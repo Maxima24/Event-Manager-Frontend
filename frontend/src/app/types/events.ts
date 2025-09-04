@@ -1,7 +1,7 @@
-export interface Event {
-  id: string
+export interface EventType {
+  id?: string
   title: string
-  date: string  // ISO string, e.g. "2025-09-03"
+  date: Date | null ,// ISO string, e.g. "2025-09-03"
   location: string
   description?: string
 }

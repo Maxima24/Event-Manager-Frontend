@@ -1,13 +1,14 @@
 "use client";
 import React, { createContext, useContext, ReactNode } from "react";
-import { Event } from "../types/events";
+import { EventType } from "../types/events"; // ✅ your renamed type
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../services/api";
+
 interface EventContextType {
-  events: Event[] | undefined;
+  events: EventType[] | undefined;
   isLoading: boolean;
-  addEvent: (event: Event) => void;
-  updateEvent: (event: Event) => void;
+  addEvent: (event: EventType) => void;
+  updateEvent: (event: EventType) => void;
   deleteEvent: (eventId: string) => void;
   getEvent: (eventId: string) => void;
 }
@@ -18,7 +19,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
 
   // Fetch events
-  const { data: events, isLoading } = useQuery<Event[]>({
+  const { data: events, isLoading } = useQuery<EventType[]>({
     queryKey: ["events"],
     queryFn: async () => {
       const res = await api.get("/api/events");
@@ -28,7 +29,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
 
   // Add event
   const addEventMutation = useMutation({
-    mutationFn: async (newEvent: Event) => {
+    mutationFn: async (newEvent: EventType) => {
       const res = await api.post(
         `${process.env.NEXT_PUBLIC_API_URL}/events`,
         newEvent
@@ -42,7 +43,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
 
   // Update event
   const updateEventMutation = useMutation({
-    mutationFn: async (updatedEvent: Event) => {
+    mutationFn: async (updatedEvent: EventType) => {
       const res = await api.put(
         `${process.env.NEXT_PUBLIC_API_URL}/events/${updatedEvent.id}`,
         updatedEvent
@@ -53,14 +54,17 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
     },
   });
-  //Get perticular event
+
+  // Get particular event
   const getEventByIdMutation = useMutation({
     mutationFn: async (eventId: string) => {
       const res = await api.get(
         `${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`
       );
+      return res.data as EventType;
     },
   });
+
   // Delete event
   const deleteEventMutation = useMutation({
     mutationFn: async (eventId: string) => {

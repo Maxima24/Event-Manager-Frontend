@@ -7,6 +7,7 @@ import { FaPerson } from "react-icons/fa6";
 import { FaBlenderPhone } from "react-icons/fa";
 
 import NavigationSpan from "./subnavigatoin";
+import Link from "next/link";
 
 export function UserNavigation() {
   return (
@@ -62,9 +63,17 @@ export function UserNavigation() {
 
       <section className="mr-8 ml-[-100px]">
         <div className="flex gap-7 text-[14px] font-semibold leading-5 mr-2 ">
-          <NavigationSpan name={"Find Event"} />
-          <NavigationSpan name={"Create Event"} />
-          <NavigationSpan name={"Find My Ticket"} />
+          <Link href='/home/event'>
+            <NavigationSpan name={"Find Event"} />
+          </Link>
+          <Link href="/home/event/createevent">
+            {" "}
+            <NavigationSpan name={"Create Event"} />
+          </Link>
+          <Link href='/home/mytickets'>
+            {" "}
+            <NavigationSpan name={"Find My Ticket"} />
+          </Link>
           <div className="flex justify-center items-center gap-2 border-transparent p-1 border-2  rounded-xl hover:border-gray-300">
             {/* room for a profile image later though */}
             <FaBlenderPhone size={16} />
