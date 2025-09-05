@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { useEventContext } from "@/app/context/eventContext";
+import { useEventContext } from "@/app/hooks/eventContext";
 import { EventType } from "@/app/types/events";
 
 type TicketUI = {

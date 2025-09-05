@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useEventContext } from "@/app/context/eventContext";
+import { useEventContext } from "@/app/hooks/eventContext";
 import { UserNavigation } from "@/app/components/userNavigation";
 import { FaCalendar, FaMapMarkerAlt } from "react-icons/fa";
 import { format } from "date-fns";

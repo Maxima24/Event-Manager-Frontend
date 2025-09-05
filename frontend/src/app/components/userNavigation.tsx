@@ -62,26 +62,38 @@ export function UserNavigation() {
       {/*navigation section */}
 
       <section className="mr-8 ml-[-100px]">
-        <div className="flex gap-7 text-[14px] font-semibold leading-5 mr-2 ">
-          <Link href='/home/event'>
+        <div className="flex gap-7 text-[14px] font-semibold leading-5 mr-2 items-center">
+          <Link href="/home/event">
             <NavigationSpan name={"Find Event"} />
           </Link>
           <Link href="/home/event/createevent">
-            {" "}
             <NavigationSpan name={"Create Event"} />
           </Link>
-          <Link href='/home/mytickets'>
-            {" "}
+          <Link href="/home/tickets">
             <NavigationSpan name={"Find My Ticket"} />
           </Link>
           <div className="flex justify-center items-center gap-2 border-transparent p-1 border-2  rounded-xl hover:border-gray-300">
             {/* room for a profile image later though */}
-            <FaBlenderPhone size={16} />
-
+            <div className="flex items-center gap-4">
+                   <Link href='/home/profile'>
+                 <FaBlenderPhone size={16} />
+            </Link>
             <span>Steel Maxima</span>
+            </div>
+           
+         
           </div>
         </div>
       </section>
     </div>
   );
 }
+//  const email ="steelmaxima21@gmail.com"
+//     const password = "qwerty234"
+//     const phoneNumber = "07045832769"
+//     const whatsappNumber = "07045832769"
+//     const firstname ="steel"
+//     const lastName ="maxima"
+
+
+
