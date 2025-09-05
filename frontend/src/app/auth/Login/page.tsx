@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react"; 
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showpassword, setshowpassword] = useState<boolean>(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,15 +20,12 @@ export default function LoginPage() {
     >
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 mt-20 rounded-lg shadow-lg w-140 h-150 mb-20"
+        className="bg-white p-8 mt-20 rounded-lg shadow-lg w-140 h-140 mb-20"
       >
-        <h2 className="text-5xl text-purple-950 font-bold mt-0 mb-2 text-center">
-          Login
-        </h2>
 
         <div className="flex justify-center items-center gap-2 mb-2 mt-3">
           <img src="/imageLogo.png" width={50} height={50} alt="Logo" />
-          <h1 className="text-2xl text-purple-950 font-bold">EventHive</h1>
+          <h1 className="text-2xl text-purple-950 font-bold">UniEvent</h1>
         </div>
 
         <h2 className="font-bold text-3xl mb-6 text-center">Welcome Back!</h2>
@@ -40,14 +39,23 @@ export default function LoginPage() {
           className="w-full text-xs h-8 p-3 border border-gray-300 rounded-md mb-4"
         />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Enter your Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full text-xs h-8 p-3 border border-gray-300 rounded-md mb-4"
-        />
+        <div className="relative mb-4">
+          <input
+            type={showpassword ? "text" : "password"}
+            name="password"
+            placeholder="Enter your Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full text-xs h-8 p-3 border border-gray-300 rounded-md"
+          />
+          <button
+            type="button"
+            onClick={() => setshowpassword(!showpassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"
+          >
+            {showpassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        </div>
 
         <div className="flex justify-between items-center mb-4">
           <label className="flex items-center text-xs">
@@ -73,7 +81,7 @@ export default function LoginPage() {
           Submit
         </button><br />
 
-        <p className="text-xs pt-2">Haven't registered?<Link href='/Register' className=" text-blue-600 hover:text-blue-900 hover:underline"> Click here.</Link></p>
+        <p className="text-xs pt-2">Haven't registered?<Link href='/auth/Register' className=" text-blue-600 hover:text-blue-900 hover:underline"> Click here.</Link></p>
 
 
         <div className="flex items-center gap-2 mt-4">
@@ -84,7 +92,7 @@ export default function LoginPage() {
         <p 
         className="text-xs pt-2 mt-3">
             By clicking on Login or  Apple, Google, or Facebook icons,
-             you agree to EventHire’s 
+             you agree to UniEvent’s 
              <Link href='/' 
              className="text-blue-600 hover:text-blue-900 hover:underline"> Terms of Service</Link> and <Link href='/' className ="text-blue-600 hover:text-blue-900  hover:underline">Privacy Policy</Link>.
         </p>
