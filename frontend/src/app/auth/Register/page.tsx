@@ -2,20 +2,31 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/app/hooks/userContext";
 
 export default function RegisterPage() {
-  const [fullname, setfullname] = useState("");
-  const [phonenumber, setphonenumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmpassword, setconfirmpassword] = useState("");
+  const {signup,user} = useAuth()
+  const [fullname, setfullname] = useState<string>("");
+  const [phoneNumber, setphonenumber] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmpassword, setconfirmpassword] = useState<string>("");
   const [showpassword, setshowpassword] = useState<boolean>(false);
   const [showconfirmpassword, setshowconfirmpassword] = useState<boolean>(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Register:", { fullname, phonenumber, email, password, confirmpassword });
+    const whatsappNumber = phoneNumber
+    const {firstName,lastName} = splitFullName(fullname)
+    await signup(email,password,phoneNumber,lastName,firstName,whatsappNumber)
+    if(!user) console.log("user not sign in an error occured");
+    // console.log("Register:", { fullname, phonenumber, email, password, confirmpassword });
   };
+  const splitFullName = (fullname:string) =>{
+    const [firstName, ...lastNameParts] = fullname.trim().split(" ");
+    const lastName = lastNameParts.join(" ");
+    return{firstName,lastName}
+  }
 
   return (
     <div
@@ -45,7 +56,7 @@ export default function RegisterPage() {
         <input
           type="tel"
           name="phone-number"
-          value={phonenumber}
+          value={phoneNumber}
           placeholder="Phone Number"
           onChange={(e) => setphonenumber(e.target.value)}
           className="w-full text-xs h-8 p-3 border border-gray-300 rounded-md mb-4"

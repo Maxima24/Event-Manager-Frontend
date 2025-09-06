@@ -8,8 +8,11 @@ import { FaBlenderPhone } from "react-icons/fa";
 
 import NavigationSpan from "./subnavigatoin";
 import Link from "next/link";
+import { useAuth } from "../hooks/userContext";
 
 export function UserNavigation() {
+    const {user,loading} = useAuth()
+    console.log(user)
   return (
     <div className="flex items-center w-auto justify-between mt-2">
       <div className="ml-2 flex  justify-center items-center gap-1.5 ">
@@ -78,7 +81,7 @@ export function UserNavigation() {
                    <Link href='/home/profile'>
                  <FaBlenderPhone size={16} />
             </Link>
-            <span>Steel Maxima</span>
+            <span>{user?.firstName}</span>
             </div>
            
          

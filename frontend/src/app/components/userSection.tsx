@@ -4,6 +4,7 @@ import QuickSearchComponent from "./quickSearch";
 import { universityCollection } from "../utils/unvirsityUploader";
 import Image from "next/image";
 import NavigationSpan from "./subnavigatoin";
+import { useAuth } from "../hooks/userContext";
 const Event = [
   {
     eventName: "OU live cort",
@@ -57,7 +58,9 @@ const Event = [
 ];
 
 export function UserSection() {
-  const universities = universityCollection();
+
+    const universities = universityCollection();
+   
   return (
     <div className="mt-10 ">
       <section>
