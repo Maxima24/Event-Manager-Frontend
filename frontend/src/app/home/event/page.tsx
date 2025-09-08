@@ -6,9 +6,12 @@ import { FaCalendar, FaMapMarkerAlt } from "react-icons/fa";
 import { format } from "date-fns";
 
 function Page() {
-  const { events,isLoading } = useEventContext();
+  const { events,isLoading,error } = useEventContext();
+  console.log(events);
 
   if(isLoading) return <div>Loading Available Events ....</div>
+  if(error) return <div className="text-red-500 text-center mt-10">Error loading events: {error.message}</div>
+  if(!events || Object.keys(events).length === 0) return <div className="text-gray-500 text-center mt-10">No events available.</div>
   return (
     <>
       <UserNavigation />

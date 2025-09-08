@@ -4,6 +4,7 @@ import Image from "next/image";
 import { FaSearch as SearchIcon } from "react-icons/fa";
 import { FaLocationPin as LocationIcon } from "react-icons/fa6";
 import NavigationSpan from "./subnavigatoin";
+import Link from "next/link";
 
 export function Navigation() {
   return (
@@ -43,10 +44,10 @@ export function Navigation() {
                 <div className=" flex items-center ">
                   <LocationIcon size={16}></LocationIcon>
                 </div>
-                 <div>
-                 <span>Obafemi Awolowo University</span>
-                 </div>
-              
+                <div>
+                  <span>Obafemi Awolowo University</span>
+                </div>
+
                 <div className=" flex rounded-3xl border-2 p-1 justify-center  items-center mx-2">
                   <SearchIcon size={14}></SearchIcon>
                 </div>
@@ -59,11 +60,13 @@ export function Navigation() {
 
       <section className="mr-8 ml-[-100px]">
         <div className="flex gap-7 text-[14px] font-semibold leading-5 mr-2 ">
-          <NavigationSpan name={"Find Event"}/>
-          <NavigationSpan name={"Create Event"}/>
-          <NavigationSpan name={"Find My Ticket"}/>
-          <NavigationSpan name={"Login"}/>
-          <NavigationSpan name={"Signup"}/>
+         
+          <Link href='/login' prefetch={true}>
+            <NavigationSpan name={"Login"} />
+          </Link>
+          <Link href='/register' prefetch={true}>
+            <NavigationSpan name={"Signup"} />
+          </Link>
         </div>
       </section>
     </div>

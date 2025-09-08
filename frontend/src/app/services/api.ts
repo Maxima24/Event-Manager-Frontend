@@ -1,7 +1,36 @@
 import axios from "axios";
-const api =axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL, // Replace with your backend URL
-    withCredentials:true
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL, // Replace with your backend URL
+  withCredentials: true,
 });
 
-export default api
+api.interceptors.response.use(
+  (res) => res,
+  async (err) => {
+   const originalRequest = err.config;
+   console.log(err.response)
+if (
+  !err.response?.data.success  && // optional chaining
+  err.response?.data.message === "Unauthorized" &&
+  !originalRequest._retry
+) {
+  originalRequest._retry = true;
+  try {
+    // Call refresh endpoint
+    await api.post("/public/auth/refresh-token"); // baseURL already included
+
+    // Retry original request
+    return api(originalRequest);
+  } catch (refreshError) {
+    console.error("Refresh token failed", refreshError);
+
+    // Log out user
+    await api.post("/public/logout-all");
+    window.location.href = "/login";
+    return Promise.reject(refreshError);
+  }
+}
+
+  }
+);
+export default api;
