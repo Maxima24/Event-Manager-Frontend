@@ -1,60 +1,117 @@
 "use client";
 import React from "react";
-import { FaUserCircle, FaEnvelope, FaCog, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaUserCircle,
+  FaEnvelope,
+  FaCog,
+  FaSignOutAlt,
+  FaArrowLeft,
+} from "react-icons/fa";
 import { UserNavigation } from "@/app/components/userNavigation";
-import {useRouter} from "next/navigation"
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/hooks/userContext";
 function ProfilePage() {
-    const router = useRouter()
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "", // leave empty to use default icon
-  };
+  const router = useRouter();
+  const {user} = useAuth()
+  const [profilePic,setProfilePic] = React.useState<File>()
+  const [pic,setPic] = React.useState<string>('')
 
+ 
+  /// handle Profile Picture upload
+ 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+  const handleProfilePicUpload =  async ()=>{
+    const formData = new FormData();
+   
+      if(!profilePic) return console.log("profileImage content is Empty");
+      formData.append("profile-pic", profilePic);
+  
+
+    const res = await fetch(`/api/single-upload`, {
+      method: "POST",
+      body: formData,
+    });
+    //get response from the next api /cloidinary service
+    const data = await res.json()
+    //if image exists 
+       setPic(data)
+  }
+}
   return (
     <>
       <UserNavigation />
-      <div>
-        
-      </div>
-      <div className="p-6 flex justify-center w-full ">
-        <div className="w-full max-w-lg bg-white shadow-sm rounded-2xl border border-gray-200 p-6 mt-56">
-          {/* Header */}
-          <div className="flex flex-col items-center gap-3 mb-6">
-            {user.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="w-24 h-24 rounded-full object-cover border"
-              />
-            ) : (
-              <FaUserCircle className="text-gray-400 w-24 h-24" />
-            )}
-            <h1 className="text-2xl font-semibold">{user.name}</h1>
-            <p className="text-gray-500 flex items-center gap-2">
-              <FaEnvelope /> {user.email}
-            </p>
-          </div>
 
-          {/* Actions */}
-          <div className="divide-y divide-gray-200">
-            <button className="w-full flex items-center justify-between py-3 px-2 hover:bg-gray-50 rounded-lg transition">
-              <span className="flex items-center gap-2 text-gray-700 font-medium" onClick={()=>router.push('profile/settings')}>
-                <FaCog className="text-gray-500" /> Account Settings
-              </span>
-              <span className="text-gray-400">›</span>
-            </button>
-            <button className="w-full flex items-center justify-between py-3 px-2 hover:bg-gray-50 rounded-lg transition">
-              <span className="flex items-center gap-2 text-red-500 font-medium">
-                <FaSignOutAlt /> Logout
-              </span>
-              <span className="text-gray-400">›</span>
-            </button>
+      <div className="min-h-screen bg-gray-50 py-12 px-4 md:px-12 flex justify-center">
+        <div className="w-full max-w-lg">
+          {/* Back Button */}
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 mb-6 text-gray-600 hover:text-gray-900 transition"
+          >
+            <FaArrowLeft className="text-lg" />
+            <span className="font-medium">Back</span>
+          </button>
+
+          {/* Profile Card */}
+          <div className="bg-white rounded-3xl shadow-xl p-8">
+            {/* Header */}
+            <div className="flex flex-col items-center gap-4 mb-8">
+              {user?.avatar ? (
+                <img
+                  src={user?.avatar}
+                  alt={user?.firstName}
+                  className="w-28 h-28 rounded-full object-cover border-4 border-transparent bg-gradient-to-r from-pink-500 to-yellow-400 p-[2px]"
+                />
+              ) : (
+                <div className="relative w-28 h-28 rounded-full bg-gradient-to-r from-pink-500 to-yellow-400 p-[2px]">
+                  <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+                    <FaUserCircle className="text-gray-300 w-24 h-24" />
+                  </div>
+                </div>
+              )}
+
+              <h1 className="text-3xl font-bold text-gray-800">{user?.firstName} {user?.lastName}</h1>
+              <p className="text-gray-500 flex items-center gap-2">
+                <FaEnvelope className="text-gray-400" /> {user?.email}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => router.push("profile/settings")}
+                className="w-full flex items-center justify-between py-4 px-5 rounded-xl bg-gray-50 hover:bg-gray-100 transition"
+              >
+                <span className="flex items-center gap-3 text-gray-700 font-medium">
+                  <FaCog className="text-gray-500" /> Account Settings
+                </span>
+                <span className="text-gray-400 text-xl">›</span>
+              </button>
+
+              <button
+                onClick={() => router.push("/home/event/myevent")}
+                className="w-full flex items-center justify-between py-4 px-5 rounded-xl bg-gray-50 hover:bg-gray-100 transition"
+              >
+                <span className="flex items-center gap-3 text-gray-700 font-medium">
+                  <FaCog className="text-gray-500" />My Events               </span>
+                <span className="text-gray-400 text-xl">›</span>
+              </button>
+
+              <button className="w-full flex items-center justify-between py-4 px-5 rounded-xl bg-gradient-to-r from-pink-500 to-yellow-400 text-white font-medium hover:opacity-90 transition">
+                <span className="flex items-center gap-3">
+                  <FaSignOutAlt /> Logout
+                </span>
+                <span className="text-white text-xl">›</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </>
   );
-}
 
+}
 export default ProfilePage;

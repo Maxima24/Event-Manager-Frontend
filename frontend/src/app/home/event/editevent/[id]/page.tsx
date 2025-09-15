@@ -1,6 +1,6 @@
 "use client";
 import { UserNavigation } from "@/app/components/userNavigation";
-import React from "react";
+import React, { useEffect } from "react";
 import { FaDownload } from "react-icons/fa";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -13,8 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/app/hooks/userContext";
 import { useEventContext } from "@/app/hooks/eventContext";
 import { EventType } from "@/app/types/events";
-import { categories } from "@/app/utils/eventCategories";
-import { TicketOrderStatus } from "@/app/types/tickets";
+import { useQuery } from "@tanstack/react-query";
 
 type TicketUI = {
   category: string;
@@ -22,19 +21,36 @@ type TicketUI = {
   quantity: number;
   available: boolean;
 };
-
-function Page() {
+interface Props{
+   params:Promise<{id:string}>
+}
+function Page({params}:Props) {
   const { user } = useAuth();
-  const { addEvent } = useEventContext();
-  const {createTicketOrder} = useTicketContext()
+  const { getUserEvent,addEvent } = useEventContext();
+   const {id} =React.use(params)
+   const safeValue = (val: any) => (val !== undefined && val !== null ? String(val) : "");
 
-  if (!user)
-    return (
-      <div className="text-red-500 text-center mt-10">
-        You need to be logged in to create an event
-      </div>
-    );
+   
+// const {data:event,isLoading,error,} = useQuery({
+//     queryKey:["editableEvent",id],
+//     queryFn:async () =>{
+//         const response = await getEventForEdit(id)
+//         console.log(response)
 
+//         return response
+//     },
+//     enabled:!!id,
+// })
+const{data:events,isLoading,error} = useQuery<EventType[]>({
+    queryKey:['userEvents',user?.id],
+    queryFn: async() =>{
+      const res = await getUserEvent(String(user?.id))
+      console.log(res)
+      return res
+    },
+    enabled:!!user?.id
+  
+  })
   const [images, setImages] = React.useState<Array<File>>([]);
   const [previewImages, setPreviewImages] = React.useState<Array<string>>([]);
 
@@ -43,14 +59,33 @@ function Page() {
     venue: "",
     description: "",
     user: "",
-    date:undefined,
-    category:""
   });
 
   const [tickets, setTickets] = React.useState<TicketUI[]>([
-    { category: "Regular", price: 0, quantity: 0, available: true ,},
+    { category: "Regular", price: 0, quantity: 0, available: true },
+    { category: "VIP", price: 0, quantity: 0, available: true },
+    { category: "VVIP", price: 0, quantity: 0, available: true },
   ]);
 
+
+
+
+
+  useEffect(()=>{
+        setEventDetails({
+            title: safeValue(event?.title),
+            venue: safeValue(event?.venue),
+            description: safeValue(event?.description),
+            user: safeValue(event?.user)
+        })
+  },[])
+const event = React.useMemo(() => {
+    if (!events || !id) return null;
+    return events.find((e: any) => String(e.id) === String(id)) ?? null;
+  }, [events, id]); // 9
+
+
+ 
   const updateTicketField = <K extends keyof TicketUI>(
     index: number,
     key: K,
@@ -94,8 +129,7 @@ function Page() {
       });
 
       const data = await res.json();
-      addEvent({ ...eventDetails, user: user?.id, images: data.urls,date:eventDetails?.date ?eventDetails?.date:undefined });
-      createTicketOrder({tickets[0]})
+      addEvent({ ...eventDetails, user: user?.id, images: data.urls });
 
       console.log("Event created:", {
         ...eventDetails,
@@ -106,7 +140,12 @@ function Page() {
       console.error("Upload failed", err);
     }
   };
-
+  if (!user)
+    return (
+      <div className="text-red-500 text-center mt-10">
+        You need to be logged in to create an event
+      </div>
+    );
 
   return (
     <>
@@ -197,16 +236,14 @@ function Page() {
                       className="w-[240px] justify-start text-left font-normal bg-white border-gray-200 hover:bg-gray-50"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4 text-pink-600" />
-                      {String(eventDetails?.date) ? 
-                     String(eventDetails.date):   "Pick a date" }
-                   
+                      Pick a date
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 shadow-lg">
                     <Calendar
                       mode="single"
-                      selected={eventDetails?.date}
-                      onSelect={(date) =>setEventDetails({...eventDetails,date:date}) }
+                      selected={undefined}
+                      onSelect={(date) => console.log(date)}
                     />
                   </PopoverContent>
                 </Popover>
@@ -227,28 +264,6 @@ function Page() {
                 />
               </div>
             </div>
-                    {/** category section */}
-                    <div className="flex flex-col gap-3 rounded-xl bg-gray-50 p-4 shadow-sm">
-  <span className="font-medium text-sm text-gray-700">
-    Category
-  </span>
-  <select
-    value={eventDetails.category ?? ""}
-    onChange={(e) =>
-      setEventDetails({ ...eventDetails, category: e.target.value })
-    }
-    className="w-full rounded-md px-3 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-400"
-  >
-    <option value="" disabled>
-      Select a category
-    </option>
-    {categories.map((c) => (
-      <option key={c} value={c}>
-        {c.charAt(0).toUpperCase() + c.slice(1)}
-      </option>
-    ))}
-  </select>
-</div>
 
             {/* Tickets */}
             <div className="w-full rounded-xl p-5 bg-gray-50 shadow-sm">
@@ -268,7 +283,7 @@ function Page() {
                         type="number"
                         min={0}
                         placeholder="Price"
-                        value={t.price || ""}
+                        value={t.price}
                         onChange={(e) =>
                           updateTicketField(i, "price", Number(e.target.value))
                         }
@@ -280,7 +295,7 @@ function Page() {
                         type="number"
                         min={0}
                         placeholder="Qty"
-                        value={t.quantity || ""}
+                        value={t.quantity}
                         onChange={(e) =>
                           updateTicketField(i, "quantity", Number(e.target.value))
                         }

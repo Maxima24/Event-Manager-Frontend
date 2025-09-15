@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { data: user, isLoading } = useQuery({
     queryKey: ["authUser"],
     queryFn: async () => {
-      const res = await api.get(`/public/auth/me`);
+      const res = await api.get(`/protected/users/current`);
       return res.data.data.user;
     },
     retry: false, // this works here

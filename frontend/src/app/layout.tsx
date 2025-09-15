@@ -1,21 +1,22 @@
-'use client'
-import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
-import "./globals.css"
-import { EventsProvider } from "./hooks/eventContext"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { ReactNode, useState } from "react"
-import { AuthProvider } from "./hooks/userContext"
+"use client";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { EventsProvider } from "./hooks/eventContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactNode, useState } from "react";
+import { AuthProvider } from "./hooks/userContext";
+import { TicketProvider } from "./hooks/ticketContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-})
+});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-})
+});
 
 // export const metadata: Metadata = {
 //   title: "Create Next App",
@@ -24,13 +25,9 @@ const geistMono = Geist_Mono({
 
 // ✅ Mark as client component
 
-export default function RootLayout({
-  children,
-}: {
-  children: ReactNode
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   // ✅ Use state to persist queryClient
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <html lang="en">
@@ -40,10 +37,12 @@ export default function RootLayout({
         {/* QueryClientProvider must wrap EventsProvider */}
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-          <EventsProvider>{children}</EventsProvider>
+            <EventsProvider>
+              <TicketProvider>{children}</TicketProvider>
+            </EventsProvider>
           </AuthProvider>
         </QueryClientProvider>
       </body>
     </html>
-  )
+  );
 }

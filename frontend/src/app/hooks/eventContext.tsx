@@ -1,9 +1,10 @@
 "use client";
 import React, { createContext, useContext, ReactNode } from "react";
 import { EventType } from "../types/events"; // ✅ your renamed type
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, UseQueryResult } from "@tanstack/react-query";
 import api from "../services/api";
 import {fetchEvents} from "../services/eventService"
+import formatDate from "../utils/formatDate";
 
 interface EventContextType {
   events: EventType[] | undefined;
@@ -12,8 +13,12 @@ interface EventContextType {
   addEvent: (event: EventType) => void;
   updateEvent: (event: EventType) => void;
   deleteEvent: (eventId: string) => void;
-  getEvent: (eventId: string) => void;
+  // getEvent: (eventId: string) => void;
   setPage: (page:number)=>void;
+  getUserEvent: (userId: string) => Promise<EventType[]>;
+  userEvents:EventType[] | undefined,
+  getEventForEdit:(id:string) => Promise<EventType>
+
   page:number;
   limit:number;
 }
@@ -21,6 +26,7 @@ interface EventContextType {
 const EventContext = createContext<EventContextType | undefined>(undefined);
 
 export const EventsProvider = ({ children }: { children: ReactNode }) => {
+  const [userEvents,setUserEvents] = React.useState<EventType[] | undefined>([])
   const queryClient = useQueryClient();
   const[page,setPage]=React.useState(1)
   const limit =10
@@ -28,7 +34,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   // Fetch events
   const { data: events, isLoading,error } = useQuery<EventType[]>({
     queryKey: ["events"],
-    queryFn: ()=>fetchEvents(page,limit),
+    queryFn: ()=>fetchEvents(),
     placeholderData:(prev) => prev
     })
 
@@ -40,7 +46,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     mutationFn: async (newEvent: EventType) => {
       const res = await api.post(
         `${process.env.NEXT_PUBLIC_API_URL_PROTECTED}/events`,
-        newEvent
+       { ...newEvent,date:formatDate(newEvent.date)}
       );
       return res.data;
     },
@@ -64,14 +70,14 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   });
 
   // Get particular event
-  const getEventByIdMutation = useMutation({
-    mutationFn: async (eventId: string) => {
-      const res = await api.get(
-        `${process.env.NEXT_PUBLIC_API_URL_PROTECTED}/events/${eventId}`
-      );
-      return res.data as EventType;
-    },
-  });
+  // const getEventByIdMutation = useMutation({
+  //   mutationFn: async (eventId: string) => {
+  //     const res = await api.get(
+  //       `${process.env.NEXT_PUBLIC_API_URL_PROTECTED}/events/${eventId}`
+  //     );
+  //     return res.data as EventType;
+  //   },
+  // });
 
   // Delete event
   const deleteEventMutation = useMutation({
@@ -82,7 +88,26 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
     },
   });
+  const getUserEvent =  async (userId: string) =>
+  {
+        const res = await api.get(
+          `${process.env.NEXT_PUBLIC_API_URL_PROTECTED}/events`,
+          { params: { page: 1, limit: 10, } } // <-- pass userId properly
+        );
 
+        return res.data.data.data as EventType[]
+  
+  };
+  const getEventForEdit = async(id:string) =>{
+    const res = await api.get(
+      `${process.env.NEXT_PUBLIC_API_URL_PROTECTED}/events?id=${id}`,// <-- pass userId properly
+    );
+    console.log("apple")
+    console.log(res)
+    return res.data.data as EventType
+  }
+
+  
   return (
     <EventContext.Provider
       value={{
@@ -92,7 +117,10 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
         addEvent: (event) => addEventMutation.mutate(event),
         updateEvent: (event) => updateEventMutation.mutate(event),
         deleteEvent: (eventId) => deleteEventMutation.mutate(eventId),
-        getEvent: (eventId) => getEventByIdMutation.mutate(eventId),
+        // getEvent: (eventId) => getEventByIdMutation.mutate(eventId),
+       getUserEvent,
+       getEventForEdit,
+        userEvents,
         setPage,
         page,
         limit

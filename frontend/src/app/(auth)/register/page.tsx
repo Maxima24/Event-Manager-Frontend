@@ -1,175 +1,128 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Calendar, Users, Star } from "lucide-react";
 import { useAuth } from "@/app/hooks/userContext";
 
 export default function RegisterPage() {
-  const {signup,user} = useAuth()
-  const [fullname, setfullname] = useState<string>("");
-  const [phoneNumber, setphonenumber] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmpassword, setconfirmpassword] = useState<string>("");
-  const [showpassword, setshowpassword] = useState<boolean>(false);
-  const [showconfirmpassword, setshowconfirmpassword] = useState<boolean>(false);
+  const { signup, user } = useAuth();
+  const [fullname, setfullname] = useState("");
+  const [phoneNumber, setphonenumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmpassword, setconfirmpassword] = useState("");
+  const [showpassword, setshowpassword] = useState(false);
+  const [showconfirmpassword, setshowconfirmpassword] = useState(false);
+
+  const splitFullName = (fullname: string) => {
+    const [firstName, ...lastNameParts] = fullname.trim().split(" ");
+    return { firstName, lastName: lastNameParts.join(" ") };
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const whatsappNumber = phoneNumber
-    const {firstName,lastName} = splitFullName(fullname)
-    await signup(email,password,phoneNumber,lastName,firstName,whatsappNumber)
-    if(!user) console.log("user not sign in an error occured");
-    // console.log("Register:", { fullname, phonenumber, email, password, confirmpassword });
+    const whatsappNumber = phoneNumber;
+    const { firstName, lastName } = splitFullName(fullname);
+    await signup(email, password, phoneNumber, lastName, firstName, whatsappNumber);
+    if (!user) console.log("user not signed in, an error occurred");
   };
-  const splitFullName = (fullname:string) =>{
-    const [firstName, ...lastNameParts] = fullname.trim().split(" ");
-    const lastName = lastNameParts.join(" ");
-    return{firstName,lastName}
-  }
 
   return (
-    <div
-      className="h-80 font-sans flex items-center justify-center min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: "url('/bg.png')" }}
-    >
+    <div className="min-h-screen relative bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 flex items-center justify-center px-4">
+      {/* Floating Shapes for Hero Style */}
+      <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full animate-pulse" />
+      <div className="absolute bottom-20 right-20 w-32 h-32 bg-white/10 rounded-full animate-pulse" />
+      <div className="absolute top-1/3 left-1/2 w-24 h-24 bg-white/10 rounded-full animate-pulse" />
+
+      {/* Form Card */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-10 mt-19 rounded-lg shadow-lg w-140 h-154 mb-19"
+        className="relative z-10 bg-white/90 backdrop-blur-lg p-10 rounded-2xl shadow-2xl w-full max-w-md"
       >
-        <div className="flex justify-center items-center mt-0 gap-2">
+        {/* Logo + Title */}
+        <div className="flex justify-center items-center gap-2 mb-6">
           <img src="/imageLogo.png" width={50} height={50} alt="Logo" />
-          <h1 className="text-2xl text-purple-950 font-bold">UniEvent</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            UniEvent
+          </h1>
         </div>
 
-        <h2 className="font-bold text-3xl mb-4 text-center">Sign Up</h2>
+        <h2 className="font-bold text-2xl mb-6 text-center text-gray-800">
+          Create Your Account
+        </h2>
 
+        {/* Inputs */}
         <input
           type="text"
-          name="full-name"
-          value={fullname}
           placeholder="Full Name"
+          value={fullname}
           onChange={(e) => setfullname(e.target.value)}
-          className="w-full text-xs h-8 p-3 border border-gray-300 rounded-md mb-4"
+          className="w-full mb-4 px-4 py-3 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-400 outline-none"
         />
-
         <input
           type="tel"
-          name="phone-number"
-          value={phoneNumber}
           placeholder="Phone Number"
+          value={phoneNumber}
           onChange={(e) => setphonenumber(e.target.value)}
-          className="w-full text-xs h-8 p-3 border border-gray-300 rounded-md mb-4"
+          className="w-full mb-4 px-4 py-3 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-400 outline-none"
         />
-
         <input
           type="email"
-          name="email"
-          value={email}
           placeholder="Email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full text-xs h-8 p-3 border border-gray-300 rounded-md mb-4"
+          className="w-full mb-4 px-4 py-3 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-400 outline-none"
         />
 
+        {/* Password Fields */}
         <div className="relative mb-4">
           <input
             type={showpassword ? "text" : "password"}
-            name="password"
-            placeholder="Enter your Password"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full text-xs h-8 p-3 border border-gray-300 rounded-md"
+            className="w-full px-4 py-3 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-400 outline-none"
           />
           <button
             type="button"
             onClick={() => setshowpassword(!showpassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
           >
-            {showpassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showpassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
 
-        <div className="relative mb-4">
+        <div className="relative mb-6">
           <input
             type={showconfirmpassword ? "text" : "password"}
-            name="confirm-password"
             placeholder="Confirm Password"
             value={confirmpassword}
             onChange={(e) => setconfirmpassword(e.target.value)}
-            className="w-full text-xs h-8 p-3 border border-gray-300 rounded-md"
+            className="w-full px-4 py-3 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-400 outline-none"
           />
           <button
             type="button"
             onClick={() => setshowconfirmpassword(!showconfirmpassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
           >
-            {showconfirmpassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showconfirmpassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
 
-        <div className="flex justify-between items-center mt-1 mb-1">
-          <label className="flex items-center text-xs">
-            <input type="checkbox" className="w-3 h-3 mr-1 accent-blue-600" />
-            Remember Me
-          </label>
-        </div>
-
+        {/* Submit */}
         <button
           type="submit"
-          className="w-full text-xs h-8 font-bold bg-purple-800 text-white py-2 rounded hover:bg-purple-950 transition"
+          className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300"
         >
-          Submit
+          Sign Up
         </button>
 
-        <p className="text-xs pt-2">
-          Already registered?{" "}
-          <Link
-            href="/auth/Login"
-            className="text-blue-600 hover:text-blue-900 hover:underline"
-          >
-            Login here.
+        {/* Login Redirect */}
+        <p className="text-sm text-gray-600 mt-4 text-center">
+          Already have an account?{" "}
+          <Link href="/login" className="text-purple-600 font-medium hover:underline">
+            Login here
           </Link>
-        </p>
-
-        <div className="flex items-center gap-2 mt-2 mb-1">
-          <hr className="flex-grow border-gray-300" />
-          <span className="text-xs text-gray-500">Or sign up with</span>
-          <hr className="flex-grow border-gray-300" />
-        </div>
-
-        <p className="text-xs mt-1 mb-2 text-gray-600">
-          By clicking on Login or Apple, Google, or Facebook icons, you agree to
-          UniEvent’s{" "}
-          <Link
-            href="/"
-            className="text-blue-600 hover:text-blue-900 hover:underline"
-          >
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link
-            href="/"
-            className="text-blue-600 hover:text-blue-900 hover:underline"
-          >
-            Privacy Policy
-          </Link>
-          .
-        </p>
-
-        <div className="flex items-center justify-center gap-20">
-          <button className="p-2 border rounded hover:bg-gray-100">
-            <img src="/apple.png" alt="Apple" className="w-6 h-6" />
-          </button>
-          <button className="p-2 border rounded hover:bg-gray-100">
-            <img src="/google.png" alt="Google" className="w-6 h-6" />
-          </button>
-          <button className="p-2 border rounded hover:bg-gray-100">
-            <img src="/facebook.png" alt="Facebook" className="w-6 h-6" />
-          </button>
-        </div>
-
-        <p className="text-blue-500 text-xs mt-4 justify-center flex">
-          Need help finding your tickets?
         </p>
       </form>
     </div>

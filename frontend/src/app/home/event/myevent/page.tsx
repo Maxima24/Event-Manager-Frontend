@@ -4,27 +4,40 @@ import { useEventContext } from "@/app/hooks/eventContext";
 import { UserNavigation } from "@/app/components/userNavigation";
 import { FaCalendar, FaMapMarkerAlt } from "react-icons/fa";
 import { format } from "date-fns";
-import { useAuth } from "@/app/hooks/userContext";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-function Page() {
+import { EventType } from "@/app/types/events";
+import { useAuth } from "@/app/hooks/userContext";
+import { useQuery } from "@tanstack/react-query";
+ function Page() {
   const router = useRouter();
   const { user } = useAuth();
-  const { events, isLoading, error,} = useEventContext();
+  const { getUserEvent } = useEventContext();
   const [mounted, setMounted] = React.useState(false);
+const{data:userEvents,isLoading,error} = useQuery<EventType[]>({
+  queryKey:['userEvents',user?.id],
+  queryFn: async() =>{
+    const res = await getUserEvent(String(user?.id))
+    console.log(res)
+    return res
+  },
+  enabled:!!user?.id
+
+})
 
   React.useEffect(() => {
     setMounted(true);
+    getUserEvent(String(user?.id))
+   
   }, [user?.id]);
 
   if (!mounted) return null;
-
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-lg text-gray-600 animate-pulse">
-          Loading Available Events...
+          Loading Your Events...
         </p>
       </div>
     );
@@ -38,7 +51,7 @@ function Page() {
       </div>
     );
 
-  if (!events || events.length === 0)
+  if (!userEvents || userEvents.length === 0)
     return (
       <>
         <UserNavigation />
@@ -61,16 +74,16 @@ function Page() {
       <div className="p-6 max-w-7xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
-            🎉 Available Events
+            🎉 My Events
           </h1>
           <p className="text-gray-500 mt-2 text-lg">
-            Discover exciting experiences and book your spot
+            Events created by {user?.firstName}
           </p>
         </div>
 
         {/* Events Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {events.map((event, index) => (
+          {userEvents.map((event, index) => (
             <motion.div
               key={event.id}
               initial={{ opacity: 0, y: 30 }}
@@ -122,8 +135,10 @@ function Page() {
                    >
                     View Details
                   </button>
-                  <button className="px-5 py-2.5 rounded-xl border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:scale-105 transition">
-                    Book Now
+                  <button className="px-5 py-2.5 rounded-xl border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 hover:scale-105 transition" onClick={
+                    ()=>router.push(`/home/event/editevent/${event.id}`)
+                  }>
+                    Edit Now
                   </button>
                 </div>
               </div>
