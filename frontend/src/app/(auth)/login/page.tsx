@@ -15,11 +15,20 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try{
+      if(!email ||password){
+        return  toast({
+          title: "All Fields required",
+          description: "Submit failed!",
+          variant: "destructive",
+          duration:3000
+        })
+      }
       await login(email, password);
       toast({
         title: "Logged in",
         description: "Login successful!",
         variant: "success",
+        duration:3000
       })
     }
     catch(err:any){
@@ -27,6 +36,7 @@ export default function LoginPage() {
         title: "Login Failed",
         description: err.response?.data?.message,
         variant: "destructive",
+        duration:3000
       })
     }
     }
