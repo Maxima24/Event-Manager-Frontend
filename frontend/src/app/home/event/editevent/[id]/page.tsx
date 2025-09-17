@@ -15,7 +15,7 @@ import { useEventContext } from "@/app/hooks/useEvent";
 import { EventType } from "@/app/types/events";
 import { categories } from "@/app/utils/eventCategories";
 import { TIcketType } from "@/app/types/tickets";
-import PaymentModal from "@/app/components/PaymentModal";
+// import PaymentModal from "@/app/components/PaymentModal";
 // import { TicketOrderStatus } from "@/app/types/tickets";
 import { useOrderContext } from "@/app/hooks/useOrder";
 import { useToast } from "@/app/contexts/toastContext";
