@@ -17,7 +17,7 @@ import { format } from "date-fns";
 import { useOrderContext } from "@/app/hooks/useOrder";
 import { OrderType } from "@/app/types/order";
 import { useTicketContext } from "@/app/hooks/useTicktets";
-import PaymentModal from "@/app/components/PaymentModal";
+// import PaymentModal from "@/app/components/PaymentModal";
 type Props = { params: { id: string } };
 /**
  * EventDetailPage — hooks order is fixed and stable.
