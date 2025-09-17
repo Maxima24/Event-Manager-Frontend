@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import { UserNavigation } from "@/app/components/userNavigation";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/hooks/userContext";
+import { useAuth } from "@/app/hooks/useAuth";
 function ProfilePage() {
   const router = useRouter();
   const {user} = useAuth()

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Eye, EyeOff, Calendar, Users, Star } from "lucide-react";
-import { useAuth } from "@/app/hooks/userContext";
+import { useAuth } from "@/app/hooks/useAuth";
 
 export default function RegisterPage() {
   const { signup, user } = useAuth();

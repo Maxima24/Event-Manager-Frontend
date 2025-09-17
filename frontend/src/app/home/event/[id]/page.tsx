@@ -12,59 +12,77 @@ import {
   FaShareAlt,
   FaArrowLeft,
 } from "react-icons/fa";
-import { useEventContext } from "@/app/hooks/eventContext";
+import { useEventContext } from "@/app/hooks/useEvent";
 import { format } from "date-fns";
+import { useOrderContext } from "@/app/hooks/useOrder";
+import { OrderType } from "@/app/types/order";
+import { useTicketContext } from "@/app/hooks/useTicktets";
 type Props = { params:Promise<{ id: string }>  };
 /**
  * EventDetailPage — hooks order is fixed and stable.
  */
 export default  function   EventDetailPage({params}:Props) {
   // -------- hooks & context (declare ALL hooks up front) --------
-  const { events } = useEventContext(); // 1
-  const router = useRouter(); // 2
-  const {id} = React.use(params)
-
-//   const params = useParams() as { id?: string }; // 3
-//   const id = params?.id;
-  console.log(id) // derived from params
-
+  const { events,isLoading } = useEventContext(); // 1
+  const router = useRouter(); //2
+  const {id} = React.use(params)// 3
+  // console.log(id)
+  const {createOrder } = useOrderContext()
+  const {createTicket} = useTicketContext()
   // local state hooks (always the same order)
   const [mounted, setMounted] = React.useState(false); // 4
   const [isFavorite, setIsFavorite] = React.useState(false); // 5
   const [buyOpen, setBuyOpen] = React.useState(false); // 6
-  const [qty, setQty] = React.useState(1); // 7
-  const [selectedTicketIdx, setSelectedTicketIdx] = React.useState<number | null>(null); // 8
 
-  // memoized derived values (always declared)
+  const [qty, setQty] = React.useState(1); // 7
+  const [selectedTicketIdx, setSelectedTicketIdx] = React.useState<number>(0); // 8
+  const [orderdata,setOrderData] = React.useState<OrderType>({
+    event:"",
+    ticketType:"",
+    numberOfTicket:0
+  })
+  const [ticketData,setTicketData] = React.useState({
+    user: "",
+    event: "",
+    order: "",
+    ticketType: {},
+    price:0,
+    purchaseDate: Date.now(),
+    count: 0
+  })  // memoized derived values (always declared)
   const event = React.useMemo(() => {
     if (!events || !id) return null;
     return events.find((e: any) => String(e.id) === String(id)) ?? null;
   }, [events, id]); // 9
-
   const similar = React.useMemo(() => {
     if (!events || !event) return [];
     return events
-      .filter((e: any) => e.id !== event.id && (e.category === event.category || e.university === event.university))
+      .filter((e: any) => e.id !== event.id && (e.category === event.category || e.university === event?.university))
       .slice(0, 4);
-  }, [events, event]); // 10
-
+  }, [events, event]); // 10 
   const totalPrice = React.useMemo(() => {
-    if (selectedTicketIdx === null || !event?.tickets) return 0;
-    const price = Number(event.tickets[selectedTicketIdx]?.price ?? 0);
+    if (selectedTicketIdx === null || !event?.ticketTypes) return 0;
+    const price = Number(event.ticketTypes[selectedTicketIdx]?.price ?? 0);
     return price * qty;
   }, [selectedTicketIdx, qty, event]); // 11
-
   // side effects
   React.useEffect(() => {
     setMounted(true);
   }, []); // 12
-
   // reset qty/selection when id changes
   React.useEffect(() => {
     setQty(1);
-    setSelectedTicketIdx(null);
+    setSelectedTicketIdx(0);
+    setOrderData((prev)=>({...prev,event:id})) // der
   }, [id]); // 13
+  React.useEffect(()=>{
+    setOrderData((prev)=>({...prev,numberOfTicket:qty})) 
+  },[qty])
 
+  React.useEffect(()=>{
+      console.log(orderdata)
+  },[orderdata])
+  
   // ----------------- mounted guard (after hooks declared) -----------------
   if (!mounted) {
     return (
@@ -76,40 +94,15 @@ export default  function   EventDetailPage({params}:Props) {
       </div>
     );
   }
-
-  // ----------------- normal loading / not-found UI -----------------
-  if (!events) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600 animate-pulse">Loading event...</p>
-      </div>
-    );
-  }
-
-  if (!event) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="max-w-2xl text-center">
-          <h2 className="text-2xl font-semibold mb-2">Event not found</h2>
-          <p className="text-gray-500 mb-6">We couldn't find the event you requested.</p>
-          <button
-            onClick={() => router.push("/home/event")}
-            className="px-5 py-2 rounded-full bg-gradient-to-r from-pink-500 to-yellow-400 text-white font-semibold"
-          >
-            Back to events
-          </button>
-        </div>
-      </div>
-    );
-  }
+  //setOrderEvent Id
 
   // helpers
-  const dateString = event.date
+  const dateString = event?.date
     ? (() => {
         try {
-          return format(new Date(event.date), "PPP '•' p");
+          return format(new Date(event?.date), "PPP '•' p");
         } catch {
-          return String(event.date);
+          return String(event?.date);
         }
       })()
     : "Date TBD";
@@ -119,8 +112,8 @@ export default  function   EventDetailPage({params}:Props) {
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
         await (navigator as any).share({
-          title: event.title,
-          text: event.description,
+          title: event?.title,
+          text: event?.description,
           url: typeof window !== "undefined" ? window.location.href : undefined,
         });
       } catch (err) {
@@ -139,10 +132,40 @@ export default  function   EventDetailPage({params}:Props) {
     }
   };
 
-  const handleRegisterClick = (ticketIdx: number | null) => {
+  const handleRegisterClick = (ticketIdx: number) => {
     setSelectedTicketIdx(ticketIdx);
     setBuyOpen(true);
   };
+  const handleOrder = async ()=> {
+       const{ticketDetails} = await createOrder(orderdata)
+       createTicket(ticketDetails)
+
+  }
+    // ----------------- normal loading / not-found UI -----------------
+    if (isLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-gray-600 animate-pulse"></p>
+        </div>
+      );
+    }
+  
+    if (!event) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-6">
+          <div className="max-w-2xl text-center">
+            <h2 className="text-2xl font-semibold mb-2">Event not found</h2>
+            <p className="text-gray-500 mb-6">We couldn't find the event you requested.</p>
+            <button
+              onClick={() => router.push("/home/event")}
+              className="px-5 py-2 rounded-full bg-gradient-to-r from-pink-500 to-yellow-400 text-white font-semibold"
+            >
+              Back to events
+            </button>
+          </div>
+        </div>
+      );
+    }
 
   // --------------- JSX (same sleek UI) ----------------
   return (
@@ -182,7 +205,7 @@ export default  function   EventDetailPage({params}:Props) {
                     <FaMapMarkerAlt /> {event.venue ?? "Venue TBD"}
                   </span>
                   <span className="inline-flex items-center gap-2">
-                    <FaUsers /> {event.attendees ?? 0} attending
+                    <FaUsers /> {event?.attendees ?? 0} attending
                   </span>
                 </div>
               </div>
@@ -276,12 +299,12 @@ export default  function   EventDetailPage({params}:Props) {
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-6 shadow-md">
             <h3 className="font-semibold text-gray-900 mb-2">Tickets</h3>
 
-            {event.tickets?.length ? (
+            {event.ticketTypes?.length ? (
               <div className="space-y-3">
-                {event.tickets.map((t: any, idx: number) => (
+                {event.ticketTypes.map((t: any, idx: number) => (
                   <div key={t.category ?? idx} className="flex items-center justify-between gap-4 p-3 rounded-xl bg-gray-50">
                     <div>
-                      <div className="font-medium text-gray-800">{t.category}</div>
+                      <div className="font-medium text-gray-800">{t.name}</div>
                       <div className="text-xs text-gray-500">{t.quantity} available</div>
                     </div>
                     <div className="text-right">
@@ -327,9 +350,22 @@ export default  function   EventDetailPage({params}:Props) {
             <div className="space-y-3">
               <label className="block text-sm text-gray-700">Ticket</label>
               <div className="flex items-center gap-3">
-                <select value={selectedTicketIdx ?? ""} onChange={(e) => setSelectedTicketIdx(e.target.value === "" ? null : Number(e.target.value))} className="flex-1 border border-gray-200 rounded-md p-2">
+            <select value={selectedTicketIdx ?? ""} onChange={(e) =>  
+            {
+              const idx = Number(e.target.value)
+              console.log(idx)
+              setSelectedTicketIdx(e.target.value === "" ? 0 : Number(e.target.value))
+              setOrderData((prev)=>({ 
+                ...prev,ticketType:event.ticketTypes[idx].name
+              }))
+             
+
+            }
+                
+
+                } className="flex-1 border border-gray-200 rounded-md p-2">
                   <option value="">General / Free</option>
-                  {event.tickets?.map((t: any, idx: number) => <option key={idx} value={idx}>{t.category} — ₦{t.price}</option>)}
+                  {event.ticketTypes?.map((t: any, idx: number) => <option key={idx} value={idx}>{t.name} — ₦{t.price}</option>)}
                 </select>
               </div>
 
@@ -350,7 +386,17 @@ export default  function   EventDetailPage({params}:Props) {
 
             <div className="mt-6 flex gap-3">
               <button onClick={() => setBuyOpen(false)} className="flex-1 px-4 py-2 rounded-xl bg-gray-100">Cancel</button>
-              <button onClick={() => { alert('registered'); setBuyOpen(false); }} className="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-yellow-400 text-white font-semibold">Confirm</button>
+              <button onClick={() => { 
+                // alert('registered');
+                 setBuyOpen(false);
+                 console.log(qty)
+              setOrderData((prev)=>({
+                ...prev,ticketType:event.ticketTypes?.[selectedTicketIdx].name
+              }))
+              handleOrder()
+                
+                
+                }} className="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-yellow-400 text-white font-semibold">Confirm</button>
             </div>
           </motion.div>
         </div>

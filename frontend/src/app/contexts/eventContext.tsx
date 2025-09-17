@@ -10,9 +10,10 @@ interface EventContextType {
   events: EventType[] | undefined;
   isLoading: boolean;
   error: any;
-  addEvent: (event: EventType) => void;
+  addEvent: (event: EventType) =>void;
   updateEvent: (event: EventType) => void;
   deleteEvent: (eventId: string) => void;
+  eventData:any | undefined,
   // getEvent: (eventId: string) => void;
   setPage: (page:number)=>void;
   getUserEvent: (userId: string) => Promise<EventType[]>;
@@ -23,12 +24,13 @@ interface EventContextType {
   limit:number;
 }
 
-const EventContext = createContext<EventContextType | undefined>(undefined);
+export const EventContext = createContext<EventContextType | undefined>(undefined);
 
 export const EventsProvider = ({ children }: { children: ReactNode }) => {
   const [userEvents,setUserEvents] = React.useState<EventType[] | undefined>([])
   const queryClient = useQueryClient();
   const[page,setPage]=React.useState(1)
+  const [eventData,setEventData] = React.useState<object | undefined>(undefined)
   const limit =10
 
   // Fetch events
@@ -37,10 +39,6 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
     queryFn: ()=>fetchEvents(),
     placeholderData:(prev) => prev
     })
-
-
-  
-
   // Add event
   const addEventMutation = useMutation({
     mutationFn: async (newEvent: EventType) => {
@@ -48,13 +46,16 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
         `${process.env.NEXT_PUBLIC_API_URL_PROTECTED}/events`,
        { ...newEvent,date:formatDate(newEvent.date)}
       );
+      const event = res.data.data ?? res.data
+      console.log(event)
+        setEventData(event)
+      console.log(eventData)
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
     },
   });
-
   // Update event
   const updateEventMutation = useMutation({
     mutationFn: async (updatedEvent: EventType) => {
@@ -117,6 +118,7 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
         addEvent: (event) => addEventMutation.mutate(event),
         updateEvent: (event) => updateEventMutation.mutate(event),
         deleteEvent: (eventId) => deleteEventMutation.mutate(eventId),
+        eventData,
         // getEvent: (eventId) => getEventByIdMutation.mutate(eventId),
        getUserEvent,
        getEventForEdit,
@@ -132,10 +134,3 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
 };
 
 // Hook to use the context
-export const useEventContext = () => {
-  const context = useContext(EventContext);
-  if (!context) {
-    throw new Error("useEventContext must be used within an EventsProvider");
-  }
-  return context;
-};

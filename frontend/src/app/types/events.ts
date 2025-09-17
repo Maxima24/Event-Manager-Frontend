@@ -1,3 +1,5 @@
+import { TIcketType } from "./tickets"
+
 export interface EventType {
   id?: string
   title: string
@@ -7,4 +9,6 @@ export interface EventType {
   images?: string[] // array of image URLs
   user:string
   category:string
+  ticketTypes:TIcketType[]
+  publicationStatus:"published"
 }

@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/app/hooks/userContext";
-import { useEventContext } from "@/app/hooks/eventContext";
+import { useAuth } from "@/app/hooks/useAuth";
+import { useEventContext } from "@/app/hooks/useEvent";
 import { EventType } from "@/app/types/events";
 import { useQuery } from "@tanstack/react-query";
 

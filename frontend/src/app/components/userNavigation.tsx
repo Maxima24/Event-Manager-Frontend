@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaUserCircle } from "react-icons/fa";
-import { useAuth } from "../hooks/userContext";
+import { useAuth } from "../hooks/useAuth";
 import NavigationSpan from "./subnavigatoin";
 
 export function UserNavigation() {

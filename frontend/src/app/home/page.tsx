@@ -7,8 +7,6 @@ function Page() {
         <UserNavigation/>
         <UserSection/>
     </div>
-  
-    
 )
 }
 

@@ -10,23 +10,30 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/app/hooks/userContext";
-import { useEventContext } from "@/app/hooks/eventContext";
+import { useAuth } from "@/app/hooks/useAuth";
+import { useEventContext } from "@/app/hooks/useEvent";
 import { EventType } from "@/app/types/events";
 import { categories } from "@/app/utils/eventCategories";
-import { TicketOrderStatus } from "@/app/types/tickets";
-
+import { TIcketType } from "@/app/types/tickets";
+// import { TicketOrderStatus } from "@/app/types/tickets";
+import { useOrderContext } from "@/app/hooks/useOrder";
+// import { useTicketContext } from "@/app/hooks/useTicket";
 type TicketUI = {
   category: string;
   price: number;
   quantity: number;
   available: boolean;
 };
+interface TicketType {
+  name: string;
+  description: string;
+  price: number;
+}
 
 function Page() {
   const { user } = useAuth();
-  const { addEvent } = useEventContext();
-  const {createTicketOrder} = useTicketContext()
+  const { addEvent,eventData } = useEventContext();
+  const {createOrder} = useOrderContext()
 
   if (!user)
     return (
@@ -44,12 +51,30 @@ function Page() {
     description: "",
     user: "",
     date:undefined,
-    category:""
+    category:"",
+    ticketTypes:[],
+    publicationStatus:"published"
   });
-
+ 
   const [tickets, setTickets] = React.useState<TicketUI[]>([
     { category: "Regular", price: 0, quantity: 0, available: true ,},
+    { category: "Vip", price: 0, quantity: 0, available: true ,},
+    { category: "VVip", price: 0, quantity: 0, available: true ,}
   ]);
+
+  const [submitTicket,setSubmitTicket] = React.useState<TicketType[]>([
+    { name: "Regular", price: 0, description: "regular ticket" ,},
+    {name: "Vip", price: 0, description: "Vip ticket",},
+    {name: "VVip", price: 0,  description: "VVIp ticket" ,}
+  ])
+
+  const updateTicket = (index: number, updates: Partial<TicketType>) => {
+    setSubmitTicket((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], ...updates };
+      return copy;
+    });
+  }; 
 
   const updateTicketField = <K extends keyof TicketUI>(
     index: number,
@@ -62,7 +87,23 @@ function Page() {
       return copy;
     });
   };
+  React.useEffect(() => {
+    console.log("submitTicket updated:", submitTicket);
+    console.log('eventDetails',eventDetails)
+  }, [submitTicket]);
 
+  const handleTIcketFormUpdate = (e:React.ChangeEvent<HTMLInputElement>,i:number,t:TicketUI) =>{
+    console.log(e)
+    const value =Number(e.target.value )                 
+            updateTicketField(i, "price", Number(e.target.value))
+    updateTicket(i,{
+      name:t.category,
+      description: `${t.category} ticket`,
+      price:value
+    }
+    )
+
+  }
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -94,14 +135,13 @@ function Page() {
       });
 
       const data = await res.json();
-      addEvent({ ...eventDetails, user: user?.id, images: data.urls,date:eventDetails?.date ?eventDetails?.date:undefined });
-      createTicketOrder({tickets[0]})
-
-      console.log("Event created:", {
-        ...eventDetails,
-        images: data.urls,
-        tickets,
-      });
+      setEventDetails((prev)=>{
+        const updated ={...prev,ticketTypes:submitTicket}
+      console.log("events to be submitted",updated)
+      return updated
+      }
+        )
+        addEvent({ ...eventDetails, user: user?.id, images: data.urls,date:eventDetails?.date ?eventDetails?.date:undefined,});
     } catch (err) {
       console.error("Upload failed", err);
     }
@@ -269,8 +309,10 @@ function Page() {
                         min={0}
                         placeholder="Price"
                         value={t.price || ""}
-                        onChange={(e) =>
-                          updateTicketField(i, "price", Number(e.target.value))
+                        onChange={(e) =>{
+                                  updateTicketField(i, "price", Number(e.target.value))
+                                  handleTIcketFormUpdate(e,i,t)
+                        }
                         }
                       />
                     </div>
@@ -281,8 +323,12 @@ function Page() {
                         min={0}
                         placeholder="Qty"
                         value={t.quantity || ""}
-                        onChange={(e) =>
+                        onChange={(e) =>{
                           updateTicketField(i, "quantity", Number(e.target.value))
+                          handleTIcketFormUpdate(e,i,t)
+
+                        }
+                      
                         }
                       />
                     </div>
@@ -291,8 +337,12 @@ function Page() {
                         id={`available-${i}`}
                         type="checkbox"
                         checked={t.available}
-                        onChange={(e) =>
+                        onChange={(e) =>{
                           updateTicketField(i, "available", e.target.checked)
+                          handleTIcketFormUpdate(e,i,t)
+                        
+                        }
+
                         }
                       />
                       <label

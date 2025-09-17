@@ -2,11 +2,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { EventsProvider } from "./hooks/eventContext";
+import { EventsProvider } from "./contexts/eventContext";
+import { ToastProvider } from "./contexts/toastContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
-import { AuthProvider } from "./hooks/userContext";
-import { TicketProvider } from "./hooks/ticketContext";
+import { AuthProvider } from "./contexts/userContext";
+import { TicketProvider } from "./contexts/ticketContext";
+import { OrderProvider } from "./contexts/orderContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,11 +38,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       >
         {/* QueryClientProvider must wrap EventsProvider */}
         <QueryClientProvider client={queryClient}>
+          <ToastProvider>
           <AuthProvider>
             <EventsProvider>
-              <TicketProvider>{children}</TicketProvider>
+              <TicketProvider>
+                <OrderProvider>
+                {children}
+                </OrderProvider>
+                </TicketProvider>
             </EventsProvider>
           </AuthProvider>
+          </ToastProvider>
+         
         </QueryClientProvider>
       </body>
     </html>

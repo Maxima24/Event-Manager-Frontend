@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useEventContext } from "@/app/hooks/eventContext";
+import { useEventContext } from "@/app/hooks/useEvent";
 import { UserNavigation } from "@/app/components/userNavigation";
 import { FaCalendar, FaMapMarkerAlt } from "react-icons/fa";
 import { format } from "date-fns";
@@ -8,7 +8,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { EventType } from "@/app/types/events";
-import { useAuth } from "@/app/hooks/userContext";
+import { useAuth } from "@/app/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
  function Page() {
   const router = useRouter();

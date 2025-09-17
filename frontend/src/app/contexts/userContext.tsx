@@ -36,7 +36,7 @@ interface userContextType {
 interface AuthProviderProps {
   children: ReactNode;
 }
-const AuthContext = createContext<userContextType | undefined>(undefined);
+ export const AuthContext = createContext<userContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const queryClient = useQueryClient();
@@ -148,10 +148,3 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within the AuthProvider");
-  }
-  return context;
-};

@@ -1,14 +1,22 @@
 import React, {createContext,ReactNode, useContext} from 'react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery,useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
+import { createTickets, createTicketType } from '../services/ticketService'
 
 interface TicketContextType{
     tickets:[]
-    isLoading:boolean
+    isLoading:boolean,
+    createTicket:(data:createTicketType)=>void
 
 }
-const TicketContext  = React.createContext<TicketContextType | undefined>(undefined)
+ export const TicketContext  = React.createContext<TicketContextType | undefined>(undefined)
 export const TicketProvider = ({children}:{children:ReactNode})  =>{
+    const querClient = useQueryClient()
+   
+    const createTicketMutation = useMutation({
+        mutationFn:(data:createTicketType)=>createTickets(data),
+        onSuccess:()=>{querClient.invalidateQueries({queryKey:['tickets']})
+    }})
     const {data:tickets,isLoading} = useQuery({
         queryKey:["tickets"],
         queryFn: async ()=>{
@@ -16,29 +24,12 @@ export const TicketProvider = ({children}:{children:ReactNode})  =>{
             return res.data.data
         }
     })
-    const createTicketMutation = useMutation({
-        mutationFn: async()=>{
-            const res = await api.post(`${process.env.NEXT_PUBLIC_API_URL_PROTECTED}/tickets/`)
-        }
-    })
-
-
-
-
-
-
-
-
-
-
-
-
-
     return (
         <TicketContext.Provider
           value={{
             tickets,
             isLoading,
+            createTicket:(data) => createTicketMutation.mutateAsync(data)
           }}
         >
           {children}
@@ -46,10 +37,3 @@ export const TicketProvider = ({children}:{children:ReactNode})  =>{
       );
 }
 
-export const useTicketContext = () =>{
-    const context = React.useContext(TicketContext)
-    if(!context){
-        throw new Error("useTicket Contect cannot be used outside of TicketProvider")
-        return context
-    }
-}
