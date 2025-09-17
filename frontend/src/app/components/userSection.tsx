@@ -174,13 +174,29 @@ const universities = [
 ];
 
 const categories = ["All", "Music", "Tech", "Culture", "Career", "Innovation", "Sports"];
-
+export interface EventType {
+  id: number;
+  eventName: string; // ✅ dynamic string
+  eventImage: string;
+  eventTime: string;
+  eventDate: string;
+  eventAvailability: string;
+  attendees: number;
+  rating: number;
+  category: string;
+  university: string;
+  description: string;
+  venue: string;
+  organizer: string;
+  tags: string[];
+  featured: boolean;
+}
 export default function UserSection() {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [selectedUniversity, setSelectedUniversity] = useState("All Universities");
   const [searchTerm, setSearchTerm] = useState("");
-  const [favorites, setFavorites] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [favorites, setFavorites] = React.useState<number[]>([]);
+  const [selectedEvent, setSelectedEvent] = React.useState<EventType|null>(null);
   const [showModal, setShowModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showNotification, setShowNotification] = useState(false);
@@ -200,15 +216,15 @@ export default function UserSection() {
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
 
-  const toggleFavorite = (eventId) => {
-    setFavorites(prev => 
-      prev.includes(eventId) 
+  const toggleFavorite = (eventId:number) => {
+    setFavorites(prev =>
+      prev.includes(eventId)
         ? prev.filter(id => id !== eventId)
         : [...prev, eventId]
     );
   };
 
-  const openEventDetails = (event) => {
+  const openEventDetails = (event:EventType) => {
     setSelectedEvent(event);
     setShowModal(true);
   };

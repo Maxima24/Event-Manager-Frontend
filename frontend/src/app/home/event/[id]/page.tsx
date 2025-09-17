@@ -17,7 +17,8 @@ import { format } from "date-fns";
 import { useOrderContext } from "@/app/hooks/useOrder";
 import { OrderType } from "@/app/types/order";
 import { useTicketContext } from "@/app/hooks/useTicktets";
-type Props = { params:Promise<{ id: string }>  };
+import PaymentModal from "@/app/components/PaymentModal";
+type Props = { params: { id: string } };
 /**
  * EventDetailPage — hooks order is fixed and stable.
  */
@@ -25,7 +26,7 @@ export default  function   EventDetailPage({params}:Props) {
   // -------- hooks & context (declare ALL hooks up front) --------
   const { events,isLoading } = useEventContext(); // 1
   const router = useRouter(); //2
-  const {id} = React.use(params)// 3
+  const { id } = params; // 3
   // console.log(id)
   const {createOrder } = useOrderContext()
   const {createTicket} = useTicketContext()
@@ -33,9 +34,10 @@ export default  function   EventDetailPage({params}:Props) {
   const [mounted, setMounted] = React.useState(false); // 4
   const [isFavorite, setIsFavorite] = React.useState(false); // 5
   const [buyOpen, setBuyOpen] = React.useState(false); // 6
+  const [isPaymentModalOPen,setIsPaymentModal] = React.useState(false)
 
   const [qty, setQty] = React.useState(1); // 7
-  const [selectedTicketIdx, setSelectedTicketIdx] = React.useState<number>(0); // 8
+  const [selectedTicketIdx, setSelectedTicketIdx] = React.useState<number | null>(0); // 8
   const [orderdata,setOrderData] = React.useState<OrderType>({
     event:"",
     ticketType:"",
@@ -57,12 +59,13 @@ export default  function   EventDetailPage({params}:Props) {
   const similar = React.useMemo(() => {
     if (!events || !event) return [];
     return events
-      .filter((e: any) => e.id !== event.id && (e.category === event.category || e.university === event?.university))
+      .filter((e: any) => e.id !== event.id && (e.category === event.category))
       .slice(0, 4);
   }, [events, event]); // 10 
   const totalPrice = React.useMemo(() => {
     if (selectedTicketIdx === null || !event?.ticketTypes) return 0;
-    const price = Number(event.ticketTypes[selectedTicketIdx]?.price ?? 0);
+    const idx = Number(selectedTicketIdx);
+    const price = Number(event.ticketTypes[idx]?.price ?? 0);
     return price * qty;
   }, [selectedTicketIdx, qty, event]); // 11
   // side effects
@@ -131,14 +134,19 @@ export default  function   EventDetailPage({params}:Props) {
       }
     }
   };
+   const handlePayment = async (data:object) =>{
 
-  const handleRegisterClick = (ticketIdx: number) => {
+   }
+
+  const handleRegisterClick = (ticketIdx: number | null) => {
     setSelectedTicketIdx(ticketIdx);
     setBuyOpen(true);
   };
   const handleOrder = async ()=> {
        const{ticketDetails} = await createOrder(orderdata)
+        await handlePayment(ticketDetails)
        createTicket(ticketDetails)
+       
 
   }
     // ----------------- normal loading / not-found UI -----------------
@@ -205,7 +213,7 @@ export default  function   EventDetailPage({params}:Props) {
                     <FaMapMarkerAlt /> {event.venue ?? "Venue TBD"}
                   </span>
                   <span className="inline-flex items-center gap-2">
-                    <FaUsers /> {event?.attendees ?? 0} attending
+                    <FaUsers /> 0 attending
                   </span>
                 </div>
               </div>
@@ -234,11 +242,11 @@ export default  function   EventDetailPage({params}:Props) {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">{event.title}</h2>
-                <p className="text-sm text-gray-600 mt-1">{event.university} • Organized by {event.organizer ?? "Organizer"}</p>
+                <p className="text-sm text-gray-600 mt-1">Organized by {event.user ?? "Organizer"}</p>
               </div>
               <div className="text-right">
                 <div className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-sm">
-                  <FaStar className="text-yellow-400" /> <span className="font-semibold">{event.rating ?? "—"}</span>
+                  <FaStar className="text-yellow-400" /> <span className="font-semibold">—</span>
                 </div>
               </div>
             </div>
@@ -257,7 +265,7 @@ export default  function   EventDetailPage({params}:Props) {
               </div>
 
               <div className="inline-flex items-center gap-3">
-                <FaUsers className="text-pink-500" /> <div className="font-medium text-gray-800">{event.attendees ?? 0} attending</div>
+                <FaUsers className="text-pink-500" /> <div className="font-medium text-gray-800">0 attending</div>
               </div>
 
               <div className="inline-flex items-center gap-3">
@@ -332,7 +340,7 @@ export default  function   EventDetailPage({params}:Props) {
 
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-5 shadow-sm">
             <h4 className="font-semibold text-gray-900">Organizer</h4>
-            <p className="text-sm text-gray-600 mt-2">{event.organizer ?? "Organizer"}</p>
+            <p className="text-sm text-gray-600 mt-2">{event.user ?? "Organizer"}</p>
             <div className="mt-4 flex gap-2">
               <button className="px-3 py-2 rounded-md bg-gray-50 text-sm text-gray-700 hover:bg-gray-100">Message</button>
               <button className="px-3 py-2 rounded-md bg-gray-50 text-sm text-gray-700 hover:bg-gray-100">Venue Info</button>
@@ -390,9 +398,11 @@ export default  function   EventDetailPage({params}:Props) {
                 // alert('registered');
                  setBuyOpen(false);
                  console.log(qty)
-              setOrderData((prev)=>({
-                ...prev,ticketType:event.ticketTypes?.[selectedTicketIdx].name
-              }))
+              if (selectedTicketIdx !== null) {
+                setOrderData((prev)=>({
+                  ...prev,ticketType:event.ticketTypes?.[Number(selectedTicketIdx)].name
+                }))
+              }
               handleOrder()
                 
                 

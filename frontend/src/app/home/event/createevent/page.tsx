@@ -15,6 +15,7 @@ import { useEventContext } from "@/app/hooks/useEvent";
 import { EventType } from "@/app/types/events";
 import { categories } from "@/app/utils/eventCategories";
 import { TIcketType } from "@/app/types/tickets";
+import PaymentModal from "@/app/components/PaymentModal";
 // import { TicketOrderStatus } from "@/app/types/tickets";
 import { useOrderContext } from "@/app/hooks/useOrder";
 import { useToast } from "@/app/contexts/toastContext";
@@ -308,8 +309,8 @@ function Page() {
                   <PopoverContent className="w-auto p-0 shadow-lg">
                     <Calendar
                       mode="single"
-                      selected={eventDetails?.date}
-                      onSelect={(date) =>setEventDetails({...eventDetails,date:date}) }
+                      selected={eventDetails?.date && typeof eventDetails.date === 'object' ? eventDetails.date : undefined}
+                      onSelect={(date) => setEventDetails({...eventDetails, date: date}) }
                     />
                   </PopoverContent>
                 </Popover>

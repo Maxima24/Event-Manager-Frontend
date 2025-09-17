@@ -59,13 +59,15 @@ function ProfilePage() {
           <div className="bg-white rounded-3xl shadow-xl p-8">
             {/* Header */}
             <div className="flex flex-col items-center gap-4 mb-8">
-              {user?.avatar ? (
-                <img
-                  src={user?.avatar}
-                  alt={user?.firstName}
-                  className="w-28 h-28 rounded-full object-cover border-4 border-transparent bg-gradient-to-r from-pink-500 to-yellow-400 p-[2px]"
-                />
-              ) : (
+              {
+              // user?.avatar ? (
+              //   <img
+              //     src={user?.avatar}
+              //     alt={user?.firstName}
+              //     className="w-28 h-28 rounded-full object-cover border-4 border-transparent bg-gradient-to-r from-pink-500 to-yellow-400 p-[2px]"
+              //   />
+              // ) : 
+              (
                 <div className="relative w-28 h-28 rounded-full bg-gradient-to-r from-pink-500 to-yellow-400 p-[2px]">
                   <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
                     <FaUserCircle className="text-gray-300 w-24 h-24" />

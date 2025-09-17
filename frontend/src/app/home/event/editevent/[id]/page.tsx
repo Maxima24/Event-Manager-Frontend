@@ -1,6 +1,6 @@
 "use client";
 import { UserNavigation } from "@/app/components/userNavigation";
-import React, { useEffect } from "react";
+import React from "react";
 import { FaDownload } from "react-icons/fa";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -13,44 +13,34 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/app/hooks/useAuth";
 import { useEventContext } from "@/app/hooks/useEvent";
 import { EventType } from "@/app/types/events";
-import { useQuery } from "@tanstack/react-query";
-
+import { categories } from "@/app/utils/eventCategories";
+import { TIcketType } from "@/app/types/tickets";
+import PaymentModal from "@/app/components/PaymentModal";
+// import { TicketOrderStatus } from "@/app/types/tickets";
+import { useOrderContext } from "@/app/hooks/useOrder";
+import { useToast } from "@/app/contexts/toastContext";
+import { routerServerGlobal } from "next/dist/server/lib/router-utils/router-server-context";
+// import { useTicketContext } from "@/app/hooks/useTicket";
 type TicketUI = {
   category: string;
   price: number;
   quantity: number;
   available: boolean;
 };
-interface Props{
-   params:Promise<{id:string}>
+interface TicketType {
+  name: string;
+  description: string;
+  price: number;
 }
-function Page({params}:Props) {
+
+function Page() {
   const { user } = useAuth();
-  const { getUserEvent,addEvent } = useEventContext();
-   const {id} =React.use(params)
-   const safeValue = (val: any) => (val !== undefined && val !== null ? String(val) : "");
+  const { addEvent,eventData } = useEventContext();
+  const {createOrder} = useOrderContext()
+  const {toast} = useToast()
 
-   
-// const {data:event,isLoading,error,} = useQuery({
-//     queryKey:["editableEvent",id],
-//     queryFn:async () =>{
-//         const response = await getEventForEdit(id)
-//         console.log(response)
+ 
 
-//         return response
-//     },
-//     enabled:!!id,
-// })
-const{data:events,isLoading,error} = useQuery<EventType[]>({
-    queryKey:['userEvents',user?.id],
-    queryFn: async() =>{
-      const res = await getUserEvent(String(user?.id))
-      console.log(res)
-      return res
-    },
-    enabled:!!user?.id
-  
-  })
   const [images, setImages] = React.useState<Array<File>>([]);
   const [previewImages, setPreviewImages] = React.useState<Array<string>>([]);
 
@@ -59,33 +49,32 @@ const{data:events,isLoading,error} = useQuery<EventType[]>({
     venue: "",
     description: "",
     user: "",
+    date:undefined,
+    category:"",
+    ticketTypes:[],
+    publicationStatus:"published"
   });
-
+ 
   const [tickets, setTickets] = React.useState<TicketUI[]>([
-    { category: "Regular", price: 0, quantity: 0, available: true },
-    { category: "VIP", price: 0, quantity: 0, available: true },
-    { category: "VVIP", price: 0, quantity: 0, available: true },
+    { category: "Regular", price: 0, quantity: 0, available: true ,},
+    { category: "Vip", price: 0, quantity: 0, available: true ,},
+    { category: "VVip", price: 0, quantity: 0, available: true ,}
   ]);
 
+  const [submitTicket,setSubmitTicket] = React.useState<TicketType[]>([
+    { name: "Regular", price: 0, description: "regular ticket" ,},
+    {name: "Vip", price: 0, description: "Vip ticket",},
+    {name: "VVip", price: 0,  description: "VVIp ticket" ,}
+  ])
 
+  const updateTicket = (index: number, updates: Partial<TicketType>) => {
+    setSubmitTicket((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], ...updates };
+      return copy;
+    });
+  }; 
 
-
-
-  useEffect(()=>{
-        setEventDetails({
-            title: safeValue(event?.title),
-            venue: safeValue(event?.venue),
-            description: safeValue(event?.description),
-            user: safeValue(event?.user)
-        })
-  },[])
-const event = React.useMemo(() => {
-    if (!events || !id) return null;
-    return events.find((e: any) => String(e.id) === String(id)) ?? null;
-  }, [events, id]); // 9
-
-
- 
   const updateTicketField = <K extends keyof TicketUI>(
     index: number,
     key: K,
@@ -97,7 +86,24 @@ const event = React.useMemo(() => {
       return copy;
     });
   };
+  React.useEffect(() => {
+    console.log("submitTicket updated:", submitTicket);
+    setEventDetails((prev)=>({...prev,ticketTypes:submitTicket}))
+    console.log('eventDetails',eventDetails)
+  }, [submitTicket]);
 
+  const handleTIcketFormUpdate = (e:React.ChangeEvent<HTMLInputElement>,i:number,t:TicketUI) =>{
+    console.log(e)
+    const value =Number(e.target.value )                 
+            updateTicketField(i, "price", Number(e.target.value))
+    updateTicket(i,{
+      name:t.category,
+      description: `${t.category} ticket`,
+      price:value
+    }
+    )
+
+  }
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -129,23 +135,82 @@ const event = React.useMemo(() => {
       });
 
       const data = await res.json();
-      addEvent({ ...eventDetails, user: user?.id, images: data.urls });
+      setEventDetails((prev)=>{
+        const updated ={...prev,ticketTypes:submitTicket}
+      console.log("events to be submitted",updated)
+      return updated
+      }
+        )
 
-      console.log("Event created:", {
-        ...eventDetails,
-        images: data.urls,
-        tickets,
-      });
+        if (
+          !eventDetails.title.trim() ||
+          !String(eventDetails.description).trim() ||
+          !eventDetails.venue.trim() ||
+          !eventDetails.date ||
+          !eventDetails.category
+        ) {
+          toast({
+            title: "Missing Information",
+            description: "Please fill in all required fields before creating the event.",
+            variant: "destructive",
+            duration: 3000,
+          });
+          return; // stop execution
+        }
+      
+        if (submitTicket.length === 0 || submitTicket.every((t) => t.price === 0 || t.description.trim() === "")) {
+          toast({
+            title: "Tickets Required",
+            description: "Please add at least one valid ticket type.",
+            variant: "destructive",
+            duration: 3000,
+          });
+          return;
+        }
+      
+
+
+
+        addEvent({ ...eventDetails, user: user?.id, images: data.urls,date:eventDetails?.date ?eventDetails?.date:undefined,});
+        toast({
+          title: "Event Created Successfully",
+          description: "creation of event was successful!",
+          variant: "success",
+          duration:3000
+        })
     } catch (err) {
-      console.error("Upload failed", err);
+      toast({
+        title: "Event Creation Failed",
+        description: "There was an error creating events",
+        variant: "destructive",
+        duration:3000
+      })
+      // console.error("Upload failed", err);
     }
   };
+ 
+
+
   if (!user)
     return (
-      <div className="text-red-500 text-center mt-10">
-        You need to be logged in to create an event
+      <div className="flex justify-center items-center h-[70vh]">
+        <div className="bg-white border border-gray-200 shadow-md rounded-2xl px-8 py-10 text-center max-w-sm">
+          <h2 className="text-xl font-semibold text-gray-800 mb-3">
+            Authentication Required
+          </h2>
+          <p className="text-gray-500 mb-6">
+            Please log in to create and manage your events.
+          </p>
+          <a
+            href="/login"
+            className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2.5 rounded-xl shadow hover:opacity-90 transition-all duration-200"
+          >
+            Go to Login
+          </a>
+        </div>
       </div>
     );
+
 
   return (
     <>
@@ -236,14 +301,16 @@ const event = React.useMemo(() => {
                       className="w-[240px] justify-start text-left font-normal bg-white border-gray-200 hover:bg-gray-50"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4 text-pink-600" />
-                      Pick a date
+                      {String(eventDetails?.date) ? 
+                     String(eventDetails.date):   "Pick a date" }
+                   
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 shadow-lg">
                     <Calendar
                       mode="single"
-                      selected={undefined}
-                      onSelect={(date) => console.log(date)}
+                      selected={eventDetails?.date}
+                      onSelect={(date) =>setEventDetails({...eventDetails,date:date}) }
                     />
                   </PopoverContent>
                 </Popover>
@@ -264,6 +331,28 @@ const event = React.useMemo(() => {
                 />
               </div>
             </div>
+                    {/** category section */}
+                    <div className="flex flex-col gap-3 rounded-xl bg-gray-50 p-4 shadow-sm">
+  <span className="font-medium text-sm text-gray-700">
+    Category
+  </span>
+  <select
+    value={eventDetails.category ?? ""}
+    onChange={(e) =>
+      setEventDetails({ ...eventDetails, category: e.target.value })
+    }
+    className="w-full rounded-md px-3 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-400"
+  >
+    <option value="" disabled>
+      Select a category
+    </option>
+    {categories.map((c) => (
+      <option key={c} value={c}>
+        {c.charAt(0).toUpperCase() + c.slice(1)}
+      </option>
+    ))}
+  </select>
+</div>
 
             {/* Tickets */}
             <div className="w-full rounded-xl p-5 bg-gray-50 shadow-sm">
@@ -283,9 +372,11 @@ const event = React.useMemo(() => {
                         type="number"
                         min={0}
                         placeholder="Price"
-                        value={t.price}
-                        onChange={(e) =>
-                          updateTicketField(i, "price", Number(e.target.value))
+                        value={t.price || ""}
+                        onChange={(e) =>{
+                                  updateTicketField(i, "price", Number(e.target.value))
+                                  handleTIcketFormUpdate(e,i,t)
+                        }
                         }
                       />
                     </div>
@@ -295,9 +386,13 @@ const event = React.useMemo(() => {
                         type="number"
                         min={0}
                         placeholder="Qty"
-                        value={t.quantity}
-                        onChange={(e) =>
+                        value={t.quantity || ""}
+                        onChange={(e) =>{
                           updateTicketField(i, "quantity", Number(e.target.value))
+                          handleTIcketFormUpdate(e,i,t)
+
+                        }
+                      
                         }
                       />
                     </div>
@@ -306,8 +401,12 @@ const event = React.useMemo(() => {
                         id={`available-${i}`}
                         type="checkbox"
                         checked={t.available}
-                        onChange={(e) =>
+                        onChange={(e) =>{
                           updateTicketField(i, "available", e.target.checked)
+                          handleTIcketFormUpdate(e,i,t)
+                        
+                        }
+
                         }
                       />
                       <label
