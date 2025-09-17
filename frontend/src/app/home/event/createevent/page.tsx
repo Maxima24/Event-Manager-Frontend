@@ -17,6 +17,8 @@ import { categories } from "@/app/utils/eventCategories";
 import { TIcketType } from "@/app/types/tickets";
 // import { TicketOrderStatus } from "@/app/types/tickets";
 import { useOrderContext } from "@/app/hooks/useOrder";
+import { useToast } from "@/app/contexts/toastContext";
+import { routerServerGlobal } from "next/dist/server/lib/router-utils/router-server-context";
 // import { useTicketContext } from "@/app/hooks/useTicket";
 type TicketUI = {
   category: string;
@@ -34,13 +36,9 @@ function Page() {
   const { user } = useAuth();
   const { addEvent,eventData } = useEventContext();
   const {createOrder} = useOrderContext()
+  const {toast} = useToast()
 
-  if (!user)
-    return (
-      <div className="text-red-500 text-center mt-10">
-        You need to be logged in to create an event
-      </div>
-    );
+ 
 
   const [images, setImages] = React.useState<Array<File>>([]);
   const [previewImages, setPreviewImages] = React.useState<Array<string>>([]);
@@ -89,6 +87,7 @@ function Page() {
   };
   React.useEffect(() => {
     console.log("submitTicket updated:", submitTicket);
+    setEventDetails((prev)=>({...prev,ticketTypes:submitTicket}))
     console.log('eventDetails',eventDetails)
   }, [submitTicket]);
 
@@ -141,11 +140,75 @@ function Page() {
       return updated
       }
         )
+
+        if (
+          !eventDetails.title.trim() ||
+          !String(eventDetails.description).trim() ||
+          !eventDetails.venue.trim() ||
+          !eventDetails.date ||
+          !eventDetails.category
+        ) {
+          toast({
+            title: "Missing Information",
+            description: "Please fill in all required fields before creating the event.",
+            variant: "destructive",
+            duration: 3000,
+          });
+          return; // stop execution
+        }
+      
+        if (submitTicket.length === 0 || submitTicket.every((t) => t.price === 0 || t.description.trim() === "")) {
+          toast({
+            title: "Tickets Required",
+            description: "Please add at least one valid ticket type.",
+            variant: "destructive",
+            duration: 3000,
+          });
+          return;
+        }
+      
+
+
+
         addEvent({ ...eventDetails, user: user?.id, images: data.urls,date:eventDetails?.date ?eventDetails?.date:undefined,});
+        toast({
+          title: "Event Created Successfully",
+          description: "creation of event was successful!",
+          variant: "success",
+          duration:3000
+        })
     } catch (err) {
-      console.error("Upload failed", err);
+      toast({
+        title: "Event Creation Failed",
+        description: "There was an error creating events",
+        variant: "destructive",
+        duration:3000
+      })
+      // console.error("Upload failed", err);
     }
   };
+ 
+
+
+  if (!user)
+    return (
+      <div className="flex justify-center items-center h-[70vh]">
+        <div className="bg-white border border-gray-200 shadow-md rounded-2xl px-8 py-10 text-center max-w-sm">
+          <h2 className="text-xl font-semibold text-gray-800 mb-3">
+            Authentication Required
+          </h2>
+          <p className="text-gray-500 mb-6">
+            Please log in to create and manage your events.
+          </p>
+          <a
+            href="/login"
+            className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2.5 rounded-xl shadow hover:opacity-90 transition-all duration-200"
+          >
+            Go to Login
+          </a>
+        </div>
+      </div>
+    );
 
 
   return (

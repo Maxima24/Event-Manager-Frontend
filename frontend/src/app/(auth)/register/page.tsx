@@ -3,9 +3,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { Eye, EyeOff, Calendar, Users, Star } from "lucide-react";
 import { useAuth } from "@/app/hooks/useAuth";
+import { useToast } from "@/app/contexts/toastContext";
 
 export default function RegisterPage() {
   const { signup, user } = useAuth();
+  const {toast} = useToast()
   const [fullname, setfullname] = useState("");
   const [phoneNumber, setphonenumber] = useState("");
   const [email, setEmail] = useState("");
@@ -23,6 +25,14 @@ export default function RegisterPage() {
     e.preventDefault();
     const whatsappNumber = phoneNumber;
     const { firstName, lastName } = splitFullName(fullname);
+    if(!email || !password || !phoneNumber || !lastName || !firstName ||!whatsappNumber){
+      return  toast({
+        title: "😦 All field required!!",
+        description: "Registration Failed",
+        variant: "destructive",
+        duration:3000
+      })
+    }
     await signup(email, password, phoneNumber, lastName, firstName, whatsappNumber);
     if (!user) console.log("user not signed in, an error occurred");
   };
