@@ -15,11 +15,11 @@ export default function LoginPage() {
   const [showpassword, setshowpassword] = useState(false);
   const { login } = useAuth();
 
-  useEffect(()=>{
-      if(user){
-        router.back()
-      }
-  },[user])
+  // useEffect(()=>{
+  //     if(user){
+  //       router.back()
+  //     }
+  // },[user])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
