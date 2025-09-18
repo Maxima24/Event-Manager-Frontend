@@ -6,7 +6,7 @@ import { useAuth } from "@/app/hooks/useAuth";
 import { useToast } from "@/app/contexts/toastContext";
 
 export default function RegisterPage() {
-  const { signup, user } = useAuth();
+  const { signup, user,login } = useAuth();
   const {toast} = useToast()
   const [fullname, setfullname] = useState("");
   const [phoneNumber, setphonenumber] = useState("");
@@ -22,19 +22,42 @@ export default function RegisterPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    
     e.preventDefault();
-    const whatsappNumber = phoneNumber;
-    const { firstName, lastName } = splitFullName(fullname);
-    if(!email || !password || !phoneNumber || !lastName || !firstName ||!whatsappNumber){
-      return  toast({
-        title: "😦 All field required!!",
+    try{
+      const whatsappNumber = phoneNumber;
+      const { firstName, lastName } = splitFullName(fullname);
+      if(!email || !password || !phoneNumber || !lastName || !firstName ||!whatsappNumber){
+        return  toast({
+          title: "😦 All field required!!",
+          description: "Registration Failed",
+          variant: "destructive",
+          duration:3000
+        })
+      }
+
+      await signup(email, password, phoneNumber, lastName, firstName, whatsappNumber);
+
+    }catch(err){
+      toast({
+        title: "😦 something went wrong",
         description: "Registration Failed",
         variant: "destructive",
         duration:3000
       })
+    }finally{
+      await login(email,password)
+      toast({
+        title: "Logged in",
+        description: "Login successful!",
+        variant: "success",
+        duration:3000
+      })
     }
-    await signup(email, password, phoneNumber, lastName, firstName, whatsappNumber);
-    if (!user) console.log("user not signed in, an error occurred");
+  
+
+  
+
   };
 
   return (
