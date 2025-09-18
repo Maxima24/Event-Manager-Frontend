@@ -18,18 +18,21 @@ import { useOrderContext } from "@/app/hooks/useOrder";
 import { OrderType } from "@/app/types/order";
 import { useTicketContext } from "@/app/hooks/useTicktets";
 // import PaymentModal from "@/app/components/PaymentModal";
-type Props = { params: { id: string } };
+type Props = {  params: Promise<{ id: string }>; };
 /**
  * EventDetailPage — hooks order is fixed and stable.
  */
 export default  function   EventDetailPage({params}:Props) {
   // -------- hooks & context (declare ALL hooks up front) --------
-  const { events,isLoading } = useEventContext(); // 1
-  const router = useRouter(); //2
-  const { id } = params; // 3
-  // console.log(id)
+  const { events,isLoading } = useEventContext()
   const {createOrder } = useOrderContext()
-  const {createTicket} = useTicketContext()
+  const {createTicket} = useTicketContext(); // 1
+  const router = useRouter(); //2
+  const { id } =React.use(params)   
+  
+  ; // 3
+  // console.log(id)
+  
   // local state hooks (always the same order)
   const [mounted, setMounted] = React.useState(false); // 4
   const [isFavorite, setIsFavorite] = React.useState(false); // 5
