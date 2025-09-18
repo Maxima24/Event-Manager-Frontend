@@ -32,12 +32,16 @@ interface TicketType {
   description: string;
   price: number;
 }
+interface PageProps{
+  params:{id:string}
+}
 
-function Page() {
+function Page({params}:PageProps) {
   const { user } = useAuth();
-  const { addEvent,eventData } = useEventContext();
+  const { addEvent,eventData,getEventForEdit } = useEventContext();
   const {createOrder} = useOrderContext()
   const {toast} = useToast()
+  const {id} = params
 
  
 
@@ -86,6 +90,20 @@ function Page() {
       return copy;
     });
   };
+
+  React.useEffect(()=>{
+    if (!id) return;
+
+  const loadEvent = async () => {
+    const event = await getEventForEdit(id); // ✅ resolved EventType
+    setEventDetails(event); // ✅ EventType | null
+  };
+
+  loadEvent();
+  },[id])
+
+
+
   React.useEffect(() => {
     console.log("submitTicket updated:", submitTicket);
     setEventDetails((prev)=>({...prev,ticketTypes:submitTicket}))

@@ -20,6 +20,7 @@ import { TIcketType } from "@/app/types/tickets";
 import { useOrderContext } from "@/app/hooks/useOrder";
 import { useToast } from "@/app/contexts/toastContext";
 import { routerServerGlobal } from "next/dist/server/lib/router-utils/router-server-context";
+import { format } from "date-fns";
 // import { useTicketContext } from "@/app/hooks/useTicket";
 type TicketUI = {
   category: string;
@@ -91,19 +92,33 @@ function Page() {
     setEventDetails((prev)=>({...prev,ticketTypes:submitTicket}))
     console.log('eventDetails',eventDetails)
   }, [submitTicket]);
+ //update TIckets ui and state
+ const handleTIcketFormUpdate = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  i: number,
+  t: TicketUI,
+  field: "price" | "quantity"
+) => {
+  const value = Number(e.target.value);
 
-  const handleTIcketFormUpdate = (e:React.ChangeEvent<HTMLInputElement>,i:number,t:TicketUI) =>{
-    console.log(e)
-    const value =Number(e.target.value )                 
-            updateTicketField(i, "price", Number(e.target.value))
-    updateTicket(i,{
-      name:t.category,
+  if (field === "price") {
+    updateTicket(i, {
+      name: t.category,
       description: `${t.category} ticket`,
-      price:value
-    }
-    )
-
+      price: value,
+    });
   }
+
+  if (field === "quantity") {
+    // If you also want quantity tracked in submitTicket:
+    updateTicket(i, {
+      name: t.category,
+      description: `${t.category} ticket`,
+      price: t.price, // keep existing price
+      // add quantity here only if TicketType supports it
+    });
+  }
+};
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -158,7 +173,7 @@ function Page() {
           return; // stop execution
         }
       
-        if (submitTicket.length === 0 || submitTicket.every((t) => t.price === 0 || t.description.trim() === "")) {
+        if (submitTicket.length === 0 || submitTicket.every((t) => t.price === 0 )) {
           toast({
             title: "Tickets Required",
             description: "Please add at least one valid ticket type.",
@@ -301,8 +316,13 @@ function Page() {
                       className="w-[240px] justify-start text-left font-normal bg-white border-gray-200 hover:bg-gray-50"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4 text-pink-600" />
-                      {String(eventDetails?.date) ? 
-                     String(eventDetails.date):   "Pick a date" }
+                      {eventDetails?.date?
+                          format(eventDetails?.date,"PPP"):"Pick a Date"
+                        
+                      
+                      
+}
+                     
                    
                     </Button>
                   </PopoverTrigger>
@@ -325,6 +345,7 @@ function Page() {
                   placeholder="Enter a location"
                   value={eventDetails.venue}
                   onChange={(e) =>
+                    
                     setEventDetails({ ...eventDetails, venue: e.target.value })
                   }
                   className="w-full rounded-md px-3 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-400"
@@ -375,7 +396,7 @@ function Page() {
                         value={t.price || ""}
                         onChange={(e) =>{
                                   updateTicketField(i, "price", Number(e.target.value))
-                                  handleTIcketFormUpdate(e,i,t)
+                                  handleTIcketFormUpdate(e,i,t,"price")
                         }
                         }
                       />
@@ -389,7 +410,7 @@ function Page() {
                         value={t.quantity || ""}
                         onChange={(e) =>{
                           updateTicketField(i, "quantity", Number(e.target.value))
-                          handleTIcketFormUpdate(e,i,t)
+                          handleTIcketFormUpdate(e,i,t,"quantity")
 
                         }
                       
@@ -403,7 +424,7 @@ function Page() {
                         checked={t.available}
                         onChange={(e) =>{
                           updateTicketField(i, "available", e.target.checked)
-                          handleTIcketFormUpdate(e,i,t)
+                          handleTIcketFormUpdate(e,i,t,"quantity")
                         
                         }
 

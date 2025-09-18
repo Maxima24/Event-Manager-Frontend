@@ -60,7 +60,7 @@ const{data:userEvents,isLoading,error} = useQuery<EventType[]>({
             No Events Available
           </h2>
           <p className="text-gray-500 mt-3 text-lg">
-            Check back later for upcoming events ✨
+              Create an Event ✨
           </p>
         </div>
       </>

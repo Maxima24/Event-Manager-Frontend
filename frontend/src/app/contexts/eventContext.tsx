@@ -18,7 +18,7 @@ interface EventContextType {
   setPage: (page:number)=>void;
   getUserEvent: (userId: string) => Promise<EventType[]>;
   userEvents:EventType[] | undefined,
-  getEventForEdit:(id:string) => Promise<EventType>
+  getEventForEdit:  (id:string) => Promise<EventType>
 
   page:number;
   limit:number;
