@@ -20,6 +20,10 @@ import { TIcketType } from "@/app/types/tickets";
 import { useOrderContext } from "@/app/hooks/useOrder";
 import { useToast } from "@/app/contexts/toastContext";
 import { routerServerGlobal } from "next/dist/server/lib/router-utils/router-server-context";
+import { fetchEvents } from "@/app/services/eventService";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/app/services/api";
+import { formatDate } from "date-fns";
 // import { useTicketContext } from "@/app/hooks/useTicket";
 type TicketUI = {
   category: string;
@@ -32,30 +36,59 @@ interface TicketType {
   description: string;
   price: number;
 }
-interface PageProps{
-  params:{id:string}
+interface PageProps{params: Promise<{ id: string }>
 }
 
 function Page({params}:PageProps) {
   const { user } = useAuth();
-  const { addEvent,eventData,getEventForEdit } = useEventContext();
+  const { addEvent,eventData } = useEventContext();
   const {createOrder} = useOrderContext()
   const {toast} = useToast()
-  const {id} = params
-
+  const [id, setId] = React.useState<string | null>(null);
+  React.useEffect(()=>{
+    params.then(resolvedParams => {
+      console.log('📋 Resolved params:', resolvedParams);
+      setId(resolvedParams.id);
+    });
+  },[params])
  
 
   const [images, setImages] = React.useState<Array<File>>([]);
   const [previewImages, setPreviewImages] = React.useState<Array<string>>([]);
-
+  const [fetchedData,setFetchedData] = React.useState<EventType>({
+    
+      title: "",
+      venue: "",
+      description: "",
+      user: "",
+      date:undefined,
+      category:"",
+      ticketTypes:[],
+      publicationStatus:"published"
+  })
+  const {data:event} = useQuery({
+    queryKey:['editableEvent',id],
+    queryFn: async()=>{
+      const res = await api.get(`${process.env.NEXT_PUBLIC_API_URL_PROTECTED}/events/getEventById`,{
+        params:{id:id}
+      })
+      console.log(res.data.data)
+      setEventDetails(res.data.data[0])
+      setPreviewImages(res.data.data[0].images)
+      console.log(eventDetails)
+        return res.data.data[0]
+    },
+    enabled:!!id
+  }
+  )
   const [eventDetails, setEventDetails] = React.useState<EventType>({
-    title: "",
-    venue: "",
-    description: "",
-    user: "",
-    date:undefined,
-    category:"",
-    ticketTypes:[],
+    title:event?.title || "",
+    venue: event?.venue || "",
+    description:event?.description || "",
+    user: event?.user ||"",
+    date: event?.date ||undefined,
+    category:event?.category ||"",
+    ticketTypes:event?.ticketTypes || [],
     publicationStatus:"published"
   });
  
@@ -91,17 +124,7 @@ function Page({params}:PageProps) {
     });
   };
 
-  React.useEffect(()=>{
-    if (!id) return;
-
-  const loadEvent = async () => {
-    const event = await getEventForEdit(id); // ✅ resolved EventType
-    setEventDetails(event); // ✅ EventType | null
-  };
-
-  loadEvent();
-  },[id])
-
+  
 
 
   React.useEffect(() => {
@@ -263,7 +286,7 @@ function Page({params}:PageProps) {
                       className="bg-white rounded-xl overflow-hidden w-28 h-28 flex items-center justify-center shadow-sm"
                     >
                       <img
-                        src={src}
+                        src={ src}
                         alt={`Preview ${i}`}
                         className="w-full h-full object-cover"
                       />
@@ -319,8 +342,7 @@ function Page({params}:PageProps) {
                       className="w-[240px] justify-start text-left font-normal bg-white border-gray-200 hover:bg-gray-50"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4 text-pink-600" />
-                      {String(eventDetails?.date) ? 
-                     String(eventDetails.date):   "Pick a date" }
+                      {eventDetails?.date ?formatDate(eventDetails?.date,"PPP") :  "Pick a date" }
                    
                     </Button>
                   </PopoverTrigger>
@@ -328,7 +350,7 @@ function Page({params}:PageProps) {
                     <Calendar
                       mode="single"
                       selected={eventDetails?.date}
-                      onSelect={(date) =>setEventDetails({...eventDetails,date:date}) }
+                      onSelect={(date) =>setEventDetails({...eventDetails,date:date})}
                     />
                   </PopoverContent>
                 </Popover>
@@ -390,7 +412,7 @@ function Page({params}:PageProps) {
                         type="number"
                         min={0}
                         placeholder="Price"
-                        value={t.price || ""}
+                        value={eventDetails.ticketTypes[i]?.price|| t.price || ""}
                         onChange={(e) =>{
                                   updateTicketField(i, "price", Number(e.target.value))
                                   handleTIcketFormUpdate(e,i,t)
@@ -404,7 +426,7 @@ function Page({params}:PageProps) {
                         type="number"
                         min={0}
                         placeholder="Qty"
-                        value={t.quantity || ""}
+                        value={ t.quantity || ""}
                         onChange={(e) =>{
                           updateTicketField(i, "quantity", Number(e.target.value))
                           handleTIcketFormUpdate(e,i,t)

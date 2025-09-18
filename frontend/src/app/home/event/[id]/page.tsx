@@ -17,7 +17,8 @@ import { format } from "date-fns";
 import { useOrderContext } from "@/app/hooks/useOrder";
 import { OrderType } from "@/app/types/order";
 import { useTicketContext } from "@/app/hooks/useTicktets";
-// import PaymentModal from "@/app/components/PaymentModal";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/app/services/api";// import PaymentModal from "@/app/components/PaymentModal";
 type Props = {  params: Promise<{ id: string }>; };
 /**
  * EventDetailPage — hooks order is fixed and stable.

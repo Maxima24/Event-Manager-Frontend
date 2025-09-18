@@ -55,17 +55,21 @@ const{data:userEvents,isLoading,error} = useQuery<EventType[]>({
     return (
       <>
         <UserNavigation />
-        <div className="flex flex-col items-center justify-center h-[70vh] text-center">
-          <h2 className="text-3xl font-bold text-gray-700">
-            No Events Available
-          </h2>
-          <p className="text-gray-500 mt-3 text-lg">
-              Create an Event ✨
-          </p>
+        <div className="h-screen flex items-center justify-center p-6">
+          <div className="max-w-xl text-center">
+            <h2 className="text-2xl font-semibold mb-2">You have no Events</h2>
+            <p className="text-gray-500 mb-6">Please Create an Event</p>
+            <button
+              onClick={() => router.push("/home/createevent")}
+              className="px-5 py-2 rounded-full bg-gradient-to-r from-pink-500 to-yellow-400 text-white font-semibold"
+            >
+              Create events
+            </button>
+          </div>
         </div>
       </>
     );
-
+   
   return (
     <>
       <UserNavigation />

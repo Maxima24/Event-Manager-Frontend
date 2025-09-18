@@ -25,6 +25,9 @@ export function UserNavigation() {
 
       {/* Navigation Links */}
       <nav className="flex items-center gap-6 text-sm font-medium">
+      <Link href="/home">
+          <NavigationSpan name="Home" />
+        </Link>
         <Link href="/home/event">
           <NavigationSpan name="Find Event" />
         </Link>

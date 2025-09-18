@@ -38,20 +38,23 @@ function Page() {
       </div>
     );
 
-  if (!events || events.length === 0)
-    return (
-      <>
-        <UserNavigation />
-        <div className="flex flex-col items-center justify-center h-[70vh] text-center">
-          <h2 className="text-3xl font-bold text-gray-700">
-            No Events Available
-          </h2>
-          <p className="text-gray-500 mt-3 text-lg">
-            Check back later for upcoming events ✨
-          </p>
+
+    if (!events || events.length === 0) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-6">
+          <div className="max-w-2xl text-center">
+            <h2 className="text-2xl font-semibold mb-2">Event not found</h2>
+            <p className="text-gray-500 mb-6">We couldn't find the event you requested.</p>
+            <button
+              onClick={() => router.push("/home")}
+              className="px-5 py-2 rounded-full bg-gradient-to-r from-pink-500 to-yellow-400 text-white font-semibold"
+            >
+              Back to events
+            </button>
+          </div>
         </div>
-      </>
-    );
+      );
+    }
 
   return (
     <>

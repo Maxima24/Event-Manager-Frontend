@@ -18,7 +18,7 @@ interface EventContextType {
   setPage: (page:number)=>void;
   getUserEvent: (userId: string) => Promise<EventType[]>;
   userEvents:EventType[] | undefined,
-  getEventForEdit:  (id:string) => Promise<EventType>
+ 
 
   page:number;
   limit:number;
@@ -99,14 +99,15 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
         return res.data.data.data as EventType[]
   
   };
-  const getEventForEdit = async(id:string) =>{
-    const res = await api.get(
-      `${process.env.NEXT_PUBLIC_API_URL_PROTECTED}/events?id=${id}`,// <-- pass userId properly
-    );
-    console.log("apple")
-    console.log(res)
-    return res.data.data as EventType
-  }
+  // const getEventForEdit = (id:string) =>{
+  //   const res = await api.get(
+  //     `${process.env.NEXT_PUBLIC_API_URL_PROTECTED}/events/getEventById`,{
+  //       params:id}// <-- pass userId properly
+  //   );
+  //   console.log("apple")
+  //   console.log(res)
+  //   return res.data.data
+  // }
 
   
   return (
@@ -121,7 +122,6 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
         eventData,
         // getEvent: (eventId) => getEventByIdMutation.mutate(eventId),
        getUserEvent,
-       getEventForEdit,
         userEvents,
         setPage,
         page,
