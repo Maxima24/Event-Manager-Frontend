@@ -321,6 +321,44 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+
+
+         {/* Footer */}
+         <footer className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white py-12 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 justify-between mb-8">
+            <div>
+              <h4 className="text-xl font-bold mb-4">Campus Events Hub</h4>
+              <p className="text-sm opacity-90">Connecting students with amazing campus experiences across Nigeria.</p>
+            </div>
+            <div>
+              <h5 className="font-semibold mb-3">Quick Links</h5>
+              <ul className="space-y-2 text-sm">
+                <li className="hover:text-purple-200 cursor-pointer">About Us</li>
+                <li className="hover:text-purple-200 cursor-pointer">How It Works</li>
+                <li className="hover:text-purple-200 cursor-pointer">For Organizers</li>
+                <li className="hover:text-purple-200 cursor-pointer">Support</li>
+              </ul>
+            </div>
+            <div>
+              <h5 className="font-semibold mb-3">Categories</h5>
+              <ul className="space-y-2 text-sm">
+                <li className="hover:text-purple-200 cursor-pointer">Music</li>
+                <li className="hover:text-purple-200 cursor-pointer">Tech</li>
+                <li className="hover:text-purple-200 cursor-pointer">Culture</li>
+                </ul>    
+                </div>
+                </div> 
+                </div>
+                <div className="text-gray-700 text-xs sm:text-sm">
+            © {new Date().getFullYear()} Campus Event Manager
+          </div>
+                
+
+
+
+      </footer>
     </div>
   );
 }

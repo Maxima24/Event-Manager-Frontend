@@ -3,11 +3,9 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaUserCircle } from "react-icons/fa";
-import { useAuth } from "../hooks/useAuth";
 import NavigationSpan from "./subnavigatoin";
 
 export function Navigation() {
-  const { user } = useAuth();
 
   return (
     <header className="flex items-center justify-between w-full px-6 py-3 bg-white shadow-sm">
@@ -25,7 +23,7 @@ export function Navigation() {
 
       {/* Navigation Links */}
       <nav className="flex items-center gap-6 text-sm font-medium">
-        <Link href="/home/event">
+        <Link href="/login">
           <NavigationSpan name="Login" />
         </Link>
         <Link href="/register">
@@ -39,7 +37,7 @@ export function Navigation() {
           className="flex items-center gap-2 px-3 py-1 border rounded-full hover:bg-gray-50 transition"
         >
           <FaUserCircle size={20} className="text-purple-800" />
-          <span className="capitalize">{user?.firstName || "Guest"}</span>
+          <span className="capitalize">{"Guest"}</span>
         </Link>
       </nav>
     </header>
