@@ -31,14 +31,8 @@ export function Navigation() {
         </Link>
       
 
-        {/* User Profile Section */}
-        <Link
-          href="/home/profile"
-          className="flex items-center gap-2 px-3 py-1 border rounded-full hover:bg-gray-50 transition"
-        >
-          <FaUserCircle size={20} className="text-purple-800" />
-          <span className="capitalize">{"Guest"}</span>
-        </Link>
+    
+        
       </nav>
     </header>
   );
