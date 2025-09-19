@@ -28,9 +28,23 @@ if (
     await api.post("/public/logout-all");
     window.location.href = "/login";
     return Promise.reject(refreshError);
-  }
+  } 
 }
 
   }
 );
+
+api.interceptors.request.use(
+  (config)=>{
+    const hasCookies = document.cookie && document.cookie.length>0
+    if(!hasCookies){
+      console.warn("Request Blocked: Request Attached")
+      return Promise.reject(new Error("No authentication cookies Found"))
+    }
+    return config
+  },
+  (error)=>Promise.reject(error)
+)
 export default api;
+
+
