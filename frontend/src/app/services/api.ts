@@ -36,10 +36,17 @@ if (
 
 api.interceptors.request.use(
   (config)=>{
-    const hasCookies = document.cookie && document.cookie.length>0
-    if(!hasCookies){
-      console.warn("Request Blocked: Request Attached")
-      return Promise.reject(new Error("No authentication cookies Found"))
+    const publicPaths = ["/login", "/register"];
+    
+    const isPublic = publicPaths.some((path) =>
+      config.url?.includes(path)
+    );
+    if (!isPublic) {
+      const hasCookies = document.cookie && document.cookie.length > 0;
+      if (!hasCookies) {
+        console.warn("Request Blocked: No authentication cookies found");
+        return Promise.reject(new Error("No authentication cookies found"));
+      }
     }
     return config
   },
