@@ -7,7 +7,7 @@ import { useToast } from "@/app/hooks/useToast";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const {user} = useAuth()
+ 
   const {toast} = useToast()
   const router = useRouter()
   const [email, setEmail] = useState("");

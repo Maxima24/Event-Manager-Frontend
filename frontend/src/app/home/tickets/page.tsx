@@ -4,8 +4,10 @@ import { UserNavigation } from "@/app/components/userNavigation";
 import { FaCalendar, FaMapMarkerAlt, FaTicketAlt, FaQrcode, FaDownload } from "react-icons/fa";
 import { format } from "date-fns";
 import QRCode from "react-qr-code";
+import { useAuth } from "@/app/hooks/useAuth";
 
 function MyTicketsPage() {
+  const {user} =useAuth()
   const tickets = [
     {
       id: "TKT12345",

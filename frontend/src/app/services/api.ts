@@ -14,6 +14,7 @@ if (
   err.response?.data.message === "Unauthorized" &&
   !originalRequest._retry
 ) {
+  console.log(originalRequest.url.includes("/login"))
   originalRequest._retry = true;
   try {
     // Call refresh endpoint
@@ -34,24 +35,17 @@ if (
   }
 );
 
-api.interceptors.request.use(
-  (config)=>{
-    const publicPaths = ["/login", "/register"];
-    
-    const isPublic = publicPaths.some((path) =>
-      config.url?.includes(path)
-    );
-    if (!isPublic) {
-      const hasCookies = document.cookie && document.cookie.length > 0;
-      if (!hasCookies) {
-        console.warn("Request Blocked: No authentication cookies found");
-        return Promise.reject(new Error("No authentication cookies found"));
-      }
-    }
-    return config
-  },
-  (error)=>Promise.reject(error)
-)
+// api.interceptors.request.use(
+//   (config)=>{
+//     const hasCookies = document.cookie && document.cookie.length>0
+//     if(!hasCookies){
+//       console.warn("Request Blocked: Request Attached")
+//       return Promise.reject(new Error("No authentication cookies Found"))
+//     }
+//     return config
+//   },
+//   (error)=>Promise.reject(error)
+// )
 export default api;
 
 
