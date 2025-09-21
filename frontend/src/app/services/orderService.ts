@@ -6,8 +6,9 @@ export const createOrder = async (order:object) => {
     // const {createTicket} = useTicketContext()
 
     const res  = await api.post(`${process.env.NEXT_PUBLIC_API_URL_PROTECTED}/orders`,order)
-    console.log(res.data.data)
+    // console.log(res.data)
     const orderDetails = res.data.data.order
+    const paymentDetails = res.data.data.virtualAccount
     console.log(orderDetails)
      const ticketDetails = {
         user:orderDetails.user
@@ -20,7 +21,8 @@ export const createOrder = async (order:object) => {
     // createTicket()
     return  {
         data:res.data.data,
-        ticketDetails
+        ticketDetails,
+        paymentDetails
     } 
 }
 

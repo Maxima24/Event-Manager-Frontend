@@ -33,12 +33,14 @@ export default function LoginPage() {
         })
       }
       await login(email, password);
+
       toast({
         title: "Logged in",
         description: "Login successful!",
         variant: "success",
         duration:3000
       })
+    
     }
     catch(err:any){
       toast({

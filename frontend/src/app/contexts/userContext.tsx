@@ -3,7 +3,6 @@ import React, { createContext, useContext, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../services/api";
-import Cookies from "js-cookie"
 interface User {
   _id: string;
   email: string;
@@ -48,7 +47,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const res = await api.get(`/protected/users/current`);
       return res.data.data.user;
     },
-    retry: true, // this works here
+    retry: false, // this works here
   });
   const signupMutation = useMutation({
     mutationFn: async ({
@@ -136,7 +135,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   return (
     <AuthContext.Provider
       value={{
-        user: user ?? null,
+        user: user || null,
         login,
         logout,
         signup,
