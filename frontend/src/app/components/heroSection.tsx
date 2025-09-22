@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa";
 import { UserNavigation } from "@/app/components/userNavigation";
 import Image from "next/image";
-
+import { useEventContext } from "../hooks/useEvent";
 const featuredMock = [
   {
     id: 1,
@@ -44,7 +44,9 @@ const featuredMock = [
 ];
 
 export default function LandingPage() {
+  const {events} = useEventContext()
   const router = useRouter();
+  console.log(events)
 
   return (
     <div className="min-h-screen bg-gray-50">

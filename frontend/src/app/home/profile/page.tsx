@@ -10,9 +10,11 @@ import {
 import { UserNavigation } from "@/app/components/userNavigation";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/hooks/useAuth";
+import { ToastContext, useToast } from "@/app/contexts/toastContext";
 function ProfilePage() {
   const router = useRouter();
-  const {user} = useAuth()
+  const {user,logout} = useAuth()
+  const {toast} = useToast()
   const [profilePic,setProfilePic] = React.useState<File>()
   const [pic,setPic] = React.useState<string>('')
 
@@ -39,6 +41,26 @@ function ProfilePage() {
     //if image exists 
        setPic(data)
   }
+}
+const handleLogout = async () =>{
+    try{
+      const res = await logout()
+    }catch(err){
+      console.error(err.message)
+      toast({
+        title: "Logout Failed",
+        description: "Failed to Logout",
+        variant:  "destructive",
+        duration: 3000
+      })
+    }finally{
+      toast({
+        title: "Logout Successful",
+        description: "Successfully Logged out",
+        variant:  "success",
+        duration: 3000
+      })
+    }
 }
   return (
     <>
@@ -102,8 +124,8 @@ function ProfilePage() {
                 <span className="text-gray-400 text-xl">›</span>
               </button>
 
-              <button className="w-full flex items-center justify-between py-4 px-5 rounded-xl bg-gradient-to-r from-pink-500 to-yellow-400 text-white font-medium hover:opacity-90 transition">
-                <span className="flex items-center gap-3">
+              <button className="w-full flex items-center justify-between py-4 px-5 rounded-xl bg-gradient-to-r from-pink-500 to-yellow-400 text-white font-medium hover:opacity-90 transition" onClick={()=>handleLogout()}>
+                 <span className="flex items-center gap-3">
                   <FaSignOutAlt /> Logout
                 </span>
                 <span className="text-white text-xl">›</span>

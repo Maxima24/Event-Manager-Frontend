@@ -85,7 +85,7 @@ export default function EventDetailPage({ params }: Props) {
     try {
       // Use a more deterministic format that works consistently
       const date = new Date(event.date);
-      return format(date, "PPP '•' p");
+      return format(date, "PPP '•' p")
     } catch {
       return String(event.date);
     }

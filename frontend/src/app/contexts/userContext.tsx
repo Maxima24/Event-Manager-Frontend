@@ -105,7 +105,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     },
     onSuccess: async () => {
       queryClient.setQueryData(["authUser"], null);
-      router.push("auth/login");
+      router.push("/login");
     },
   });
   const signup = async (
